@@ -19,4 +19,4 @@
 
 - The "input" folder is incomplete for the same reason. The preprocessed test data only could be uploaded. The three missing files can be obtained by running preprocess_3d_data.ipynb with the previously mentioned NetCDF files.
 
-Template for the architecture of the network: https://debuggercafe.com/convolutional-variational-autoencoder-in-pytorch-on-mnist-dataset/.
+Template for the network architecture: https://debuggercafe.com/convolutional-variational-autoencoder-in-pytorch-on-mnist-dataset/.
