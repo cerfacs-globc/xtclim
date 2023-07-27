@@ -65,8 +65,8 @@ def evaluate(model, dataloader, dataset, device, criterion, beta):
             data= data[0]
             data = data.to(device)
             reconstruction, mu, logvar = model(data)
-            bce_loss = criterion(reconstruction, data)
-            loss = final_loss(bce_loss, mu, logvar, beta)
+            # evaluate anomalies with reconstruction error only
+            loss = criterion(reconstruction, data)
             running_loss += loss.item()
             losses.append(loss.item()) # keep track of all losses
             # save the last batch input and output of every epoch
