@@ -17,6 +17,8 @@
 
 - The "data" folder could not be uploaded because of its weight. It contains the NetCDF files pr_day_CMCC-ESM2_historical_r1i1p1f1_gn_19750101-19991231.nc for three climate variables (pr precipitations, tasmax maximum temperature at surface, and sfcWind wind), for both historical (1975-1999) and projection (2065-2089) time periods.
 
-- The "input" folder is incomplete for the same reason. The preprocessed test data only could be uploaded. The three missing files can be obtained by running preprocess_3d_data.ipynb with the previously mentioned NetCDF files.
+- The "input" folder is incomplete for the same reason. Only the preprocessed test data could be uploaded. The three missing files can be obtained by running preprocess_3d_data.ipynb with the previously mentioned NetCDF files.
 
 Template for the network architecture: https://debuggercafe.com/convolutional-variational-autoencoder-in-pytorch-on-mnist-dataset/.
+
+Estimation of the carbon footprint of the training with the codecarbon package (see first and last lines of src/train.py).
