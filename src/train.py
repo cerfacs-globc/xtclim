@@ -1,3 +1,14 @@
+from codecarbon import EmissionsTracker
+
+# Instantiate the tracker object
+tracker = EmissionsTracker(
+    output_dir="../code_carbon/",  # define the directory to which we'll write our emissions results
+    output_file="emissions.csv",  # define the name of the file containing our emissions results
+    # log_level='error' # comment out this line to see regular output
+)
+tracker.start()
+
+
 import torch
 import torch.optim as optim
 import numpy as np
@@ -10,11 +21,10 @@ from engine import train, validate
 from utils import save_reconstructed_images, image_to_vid, save_loss_plot, save_ex
 from initialization import device, beta, criterion
 
-
 # initialize learning parameters
 lr = 0.001
 batch_size = 64
-epochs = 100
+epochs = 10
 
 # early stopping parameters
 stop_delta = 0.01 # under 1% improvement the model may have started converging
@@ -102,11 +112,14 @@ print(f"Train Loss: {train_epoch_loss:.4f}")
 print(f"Val Loss: {valid_epoch_loss:.4f}")
 
 # save model and weights
-torch.save(cvae_model.state_dict(), '../outputs/cvae_model_3d.pth')
+torch.save(cvae_model.state_dict(), '../outputs/cvae_model_3d_carbon.pth')
 # save the reconstructions as a .gif file
 image_to_vid(grid_images)
 # save the loss plots
 save_loss_plot(train_loss, valid_loss)
 # save the loss evolutions
-pd.DataFrame(train_loss).to_csv("../outputs/train_loss_indiv_3d.csv")
-pd.DataFrame(valid_loss).to_csv("../outputs/test_loss_indiv_3d.csv")
+pd.DataFrame(train_loss).to_csv("../outputs/train_loss_indiv_3d_carbon.csv")
+pd.DataFrame(valid_loss).to_csv("../outputs/test_loss_indiv_3d_carbon.csv")
+
+emissions = tracker.stop()
+print(f"Emissions from this training run: {emissions:.5f} kg CO2eq")
