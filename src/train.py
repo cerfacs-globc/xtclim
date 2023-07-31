@@ -24,7 +24,7 @@ from initialization import device, beta, criterion
 # initialize learning parameters
 lr = 0.001
 batch_size = 64
-epochs = 10
+epochs = 100
 
 # early stopping parameters
 stop_delta = 0.01 # under 1% improvement the model may have started converging
@@ -112,14 +112,14 @@ print(f"Train Loss: {train_epoch_loss:.4f}")
 print(f"Val Loss: {valid_epoch_loss:.4f}")
 
 # save model and weights
-torch.save(cvae_model.state_dict(), '../outputs/cvae_model_3d_carbon.pth')
+torch.save(cvae_model.state_dict(), '../outputs/cvae_model_3d.pth')
 # save the reconstructions as a .gif file
 image_to_vid(grid_images)
 # save the loss plots
 save_loss_plot(train_loss, valid_loss)
 # save the loss evolutions
-pd.DataFrame(train_loss).to_csv("../outputs/train_loss_indiv_3d_carbon.csv")
-pd.DataFrame(valid_loss).to_csv("../outputs/test_loss_indiv_3d_carbon.csv")
+pd.DataFrame(train_loss).to_csv("../outputs/train_loss_indiv_3d.csv")
+pd.DataFrame(valid_loss).to_csv("../outputs/test_loss_indiv_3d.csv")
 
 emissions = tracker.stop()
 print(f"Emissions from this training run: {emissions:.5f} kg CO2eq")
