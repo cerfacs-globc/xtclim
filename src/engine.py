@@ -1,5 +1,6 @@
 from tqdm import tqdm
 import torch
+from initialization import pixel_wise_criterion
 
 def final_loss(bce_loss, mu, logvar, beta=0.1):
     """
@@ -54,23 +55,27 @@ def validate(model, dataloader, dataset, device, criterion, beta):
     val_loss = running_loss / counter
     return val_loss, recon_images
 
-def evaluate(model, dataloader, dataset, device, criterion, beta):
+def evaluate(model, dataloader, dataset, device, 
+             criterion, pixel_wise_criterion = pixel_wise_criterion):
     model.eval()
     running_loss = 0.0
     losses = []
     counter = 0
+    recon_images = []
+    pixel_wise_losses = []
     with torch.no_grad():
         for i, data in tqdm(enumerate(dataloader), total=int(len(dataset)/dataloader.batch_size)):
             counter += 1
             data= data[0]
             data = data.to(device)
-            reconstruction, mu, logvar = model(data)
+            reconstruction, _, _ = model(data)
             # evaluate anomalies with reconstruction error only
             loss = criterion(reconstruction, data)
+            pixel_wise_losses.append(pixel_wise_criterion(reconstruction, 
+                                                          data))
             running_loss += loss.item()
             losses.append(loss.item()) # keep track of all losses
-            # save the last batch input and output of every epoch
-            if i == int(len(dataset)/dataloader.batch_size) - 1:
-                recon_images = reconstruction
+            # save output of every evaluation
+            recon_images.append(reconstruction)
     val_loss = running_loss / counter
-    return val_loss, recon_images, losses
+    return val_loss, recon_images, losses, pixel_wise_losses
