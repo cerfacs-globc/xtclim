@@ -2,20 +2,19 @@ from tqdm import tqdm
 import torch
 from initialization import pixel_wise_criterion
 
-def final_loss(bce_loss, mu, logvar, beta=0.1):
+def final_loss(recon_loss, mu, logvar, beta=0.1):
     """
-    Adds up reconstruction loss (BCELoss) and Kullback-Leibler divergence.
+    Adds up reconstruction loss and Kullback-Leibler divergence.
     KL-Divergence = 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     
     Parameters:
-    bce_loss: recontruction loss
+    recon_loss: recontruction loss
     mu: the mean from the latent vector
     logvar: log variance from the latent vector
     beta: weight over the KL-Divergence
     """
-    BCE = bce_loss 
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    return BCE + beta*KLD
+    return recon_loss + beta*KLD
 
 def train(model, dataloader, dataset, device, optimizer, criterion, beta):
     # trains the model over shuffled data set
@@ -40,9 +39,9 @@ def train(model, dataloader, dataset, device, optimizer, criterion, beta):
         data = data.to(device)
         optimizer.zero_grad()
         reconstruction, mu, logvar = model(data)
-        bce_loss = criterion(reconstruction, data)
+        recon_loss = criterion(reconstruction, data)
         # total loss = reconstruction loss + KL divergence
-        loss = final_loss(bce_loss, mu, logvar, beta)
+        loss = final_loss(recon_loss, mu, logvar, beta)
         loss.backward() # backpropagate loss to learn from mistakes
         running_loss += loss.item()
         optimizer.step()
@@ -71,8 +70,8 @@ def validate(model, dataloader, dataset, device, criterion, beta):
             data= data[0]
             data = data.to(device)
             reconstruction, mu, logvar = model(data)
-            bce_loss = criterion(reconstruction, data)
-            loss = final_loss(bce_loss, mu, logvar, beta)
+            recon_loss = criterion(reconstruction, data)
+            loss = final_loss(recon_loss, mu, logvar, beta)
             running_loss += loss.item()
             # save the last batch input and output of every epoch
             if i == int(len(dataset)/dataloader.batch_size) - 1:
