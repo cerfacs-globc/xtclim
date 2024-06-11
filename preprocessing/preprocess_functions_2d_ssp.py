@@ -19,22 +19,36 @@ import pandas as pd
 
 # #### 1. Load Data to xarrays
 
-data_dir = "/scratch/globc/durif/cvae_season_kraken/data/"
+histo_dir = "/scratch/globc/durif/esgf_download/"
+proj_dir = "/scratch/globc/durif/cvae_season_kraken/data/"
+
 
 # Historical Datasets
 # regrouped by climate variable
 
+temp_850 = xr.open_dataset(
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_18500101-18741231.nc"
+)
+temp_875 = xr.open_dataset(
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_18750101-18991231.nc"
+)
+temp_900 = xr.open_dataset(
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19000101-19241231.nc"
+)
+temp_25 = xr.open_dataset(
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19250101-19491231.nc"
+)
+
 temp_50 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19500101-19741231.nc"
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19500101-19741231.nc"
 )
 temp_75 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19750101-19991231.nc"
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19750101-19991231.nc"
 )
 temp_00 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_20000101-20141231.nc"
+    f"{histo_dir}tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_20000101-20141231.nc"
 )
-temp_histo = xr.concat([temp_50, temp_75, temp_00], "time")
-
+temp_histo = xr.concat([temp_850, temp_875, temp_900, temp_25, temp_50, temp_75, temp_00], "time")
 
 # Projection Datasets
 # regrouped by climate variable
@@ -44,16 +58,16 @@ temp_histo = xr.concat([temp_50, temp_75, temp_00], "time")
 scenario = "126"
 
 temp_15 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20150101-20391231.nc"
+    f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20150101-20391231.nc"
 )
 temp_40 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20400101-20641231.nc"
+    f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20400101-20641231.nc"
 )
 temp_65 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20650101-20891231.nc"
+    f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20650101-20891231.nc"
 )
 temp_90 = xr.open_dataset(
-    f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20900101-21001231.nc"
+    f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20900101-21001231.nc"
 )
 temp_proj = xr.concat([temp_15, temp_40, temp_65, temp_90], "time")
 
@@ -61,7 +75,7 @@ temp_proj = xr.concat([temp_15, temp_40, temp_65, temp_90], "time")
 # Load land-sea mask data
 
 sftlf = xr.open_dataset(
-    f"{data_dir}sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
+    f"{proj_dir}sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
     chunks={"time": 10},
 )
 
@@ -295,16 +309,16 @@ for scenario in scenarios:
 
     # Load projection data
     temp_15 = xr.open_dataset(
-        f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20150101-20391231.nc"
+        f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20150101-20391231.nc"
     )
     temp_40 = xr.open_dataset(
-        f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20400101-20641231.nc"
+        f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20400101-20641231.nc"
     )
     temp_65 = xr.open_dataset(
-        f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20650101-20891231.nc"
+        f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20650101-20891231.nc"
     )
     temp_90 = xr.open_dataset(
-        f"{data_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20900101-21001231.nc"
+        f"{proj_dir}tasmax_day_CMCC-ESM2_ssp{scenario}_r1i1p1f1_gn_20900101-21001231.nc"
     )
     temp_proj = xr.concat([temp_15, temp_40, temp_65, temp_90], "time")
 
