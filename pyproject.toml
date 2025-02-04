@@ -3,13 +3,13 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "itwinai-awesome-plugin"
+name = "itwinai-xtclim-plugin"
 version = "0.1.0"
-description = "User's custom plugin for itwinai"
-authors = [{ name = "User Name", email = "user@example.com" }]
+description = "xtclim plugin for itwinai"
+authors = [{ name = "Christian Page", email = "christian.page@cerfacs.fr" }]
 dependencies = ["itwinai"]
 
 [tool.setuptools.packages.find]
 # Declare this package as part of the `itwinai.plugins` namespace
 where = ["src"]
-include = ["itwinai.plugins.my_awesome_plugin"]
+include = ["itwinai.plugins.xtclim"]
