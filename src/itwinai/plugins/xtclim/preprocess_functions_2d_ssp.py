@@ -205,10 +205,10 @@ class PreprocessData(DataGetter):
         )
             
         ##### 2. Restrict to a Geospatial Square
-        min_lon = config.get('GENERAL', 'min_lon')
-        max_lon = config.get('GENERAL', 'max_lon')
-        min_lat = config.get('GENERAL', 'min_lat')
-        max_lat = config.get('GENERAL', 'max_lat')
+        min_lon = config.getfloat('GENERAL', 'min_lon')
+        max_lon = config.getfloat('GENERAL', 'max_lon')
+        min_lat = config.getfloat('GENERAL', 'min_lat')
+        max_lat = config.getfloat('GENERAL', 'max_lat')
         sq32_world_region = {"min_lon": min_lon, "max_lon": max_lon, "min_lat": min_lat, "max_lat": max_lat}
         
         land_prop, lat_list, lon_list = self.sftlf_to_ndarray(sftlf, sq32_world_region)
@@ -242,7 +242,7 @@ class PreprocessData(DataGetter):
         # IPCC scenarios: SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5
         # choose among "126", "245", "370", "585"
         # scenario = self.scenario
-        scenarios = config.get('GENERAL', 'scenarios')
+        scenarios = config.getint('GENERAL', 'scenarios')
         
         for scenario in scenarios:
 

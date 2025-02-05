@@ -17,9 +17,9 @@ pixel_wise_criterion = nn.MSELoss(reduction='none')
 
 # KL divergence handles dispersion of information in latent space
 # a balance is to be found with the prevailing reconstruction error
-beta = config.get('MODEL', 'beta')
+beta = config.getfloat('MODEL', 'beta')
 #beta = 0.1
 
 # number of evaluations for each dataset
-n_avg = config.get('MODEL', 'n_avg')
+n_avg = config.getint('MODEL', 'n_avg')
 #n_avg = 20

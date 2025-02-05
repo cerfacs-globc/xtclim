@@ -8,13 +8,13 @@ import configparser as cp
 config = cp.ConfigParser()
 config.read('xtclim.json')
 
-kernel_size = config.get('MODEL', 'kernel_size')
+kernel_size = config.getint('MODEL', 'kernel_size')
 #kernel_size = 4 # (4, 4) kernel
-init_channels = config.get('MODEL', 'init_channels')
+init_channels = config.getint('MODEL', 'init_channels')
 #init_channels = 8 # initial number of filters
-image_channels = config.get('MODEL', 'image_channels')
+image_channels = config.getint('MODEL', 'image_channels')
 #image_channels = 2 # 1 channel/variable: max temperature, precipitation, wind
-latent_dim = config.get('MODEL', 'latent_dim')
+latent_dim = config.getint('MODEL', 'latent_dim')
 #latent_dim = 128 # latent space dimension (in which the image is compressed)
 
 

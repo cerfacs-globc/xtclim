@@ -31,8 +31,8 @@ if past_evaluation:
         cvae_model.load_state_dict(torch.load(f'./outputs/cvae_model_{season}_1d.pth'))
         
         # train set and data loader
-        train_time = pd.read_csv(f"../input/dates_train_{season}_data.csv")
-        train_data = np.load(f"../input/preprocessed_1d_train_{season}_data_allssp.npy")
+        train_time = pd.read_csv(f"./input/dates_train_{season}_data.csv")
+        train_data = np.load(f"./input/preprocessed_1d_train_{season}_data_allssp.npy")
         n_train = len(train_data)
         trainset = [ ( torch.from_numpy(np.reshape(train_data[i], (3, 32, 32))), 
                         train_time['0'][i] ) for i in range(n_train) ]
@@ -41,8 +41,8 @@ if past_evaluation:
         )
 
         # test set and data loader
-        test_time = pd.read_csv(f"../input/dates_test_{season}_data.csv")
-        test_data = np.load(f"../input/preprocessed_1d_test_{season}_data_allssp.npy")
+        test_time = pd.read_csv(f"./input/dates_test_{season}_data.csv")
+        test_data = np.load(f"./input/preprocessed_1d_test_{season}_data_allssp.npy")
         n_test = len(test_data)
         testset = [ ( torch.from_numpy(np.reshape(test_data[i], (3, 32, 32))), 
                         test_time['0'][i] ) for i in range(n_test) ]
@@ -92,8 +92,8 @@ if future_evaluation:
         for scenario in scenarios:
             
             # projection set and data loader
-            proj_time = pd.read_csv(f"../input/dates_proj_{season}_data.csv")
-            proj_data = np.load(f"../input/preprocessed_1d_proj{scenario}_{season}_data_allssp.npy")
+            proj_time = pd.read_csv(f"./input/dates_proj_{season}_data.csv")
+            proj_data = np.load(f"./input/preprocessed_1d_proj{scenario}_{season}_data_allssp.npy")
             n_proj = len(proj_data)
             projset = [ ( torch.from_numpy(np.reshape(proj_data[i], (3, 32, 32))), 
                             proj_time['0'][i] ) for i in range(n_proj) ]

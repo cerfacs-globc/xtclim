@@ -21,18 +21,18 @@ config.read('xtclim.json')
 # #### 1. Load Data to xarray
 
 # choose the needed number of members
-n_memb = config.get('TRAIN', 'n_memb')
+n_memb = config.getint('TRAIN', 'n_memb')
 
 # define relevant scenarios
 #scenarios = ["126", "245", "370", "585"]
-scenarios = config.get('GENERAL', 'scenarios')
+scenarios = config.getint('GENERAL', 'scenarios')
 
 # Load preprocessed "daily temperature images" and time series
 
-train_images = np.load("../input/preprocessed_2d_train_data_allssp.npy")
-test_images = np.load("../input/preprocessed_2d_test_data_allssp.npy")
-train_time = pd.read_csv("../input/dates_train_data.csv")
-test_time = pd.read_csv("../input/dates_test_data.csv")
+train_images = np.load("./input/preprocessed_2d_train_data_allssp.npy")
+test_images = np.load("./input/preprocessed_2d_test_data_allssp.npy")
+train_time = pd.read_csv("./input/dates_train_data.csv")
+test_time = pd.read_csv("./input/dates_test_data.csv")
 
 
 # #### 2. Split Yearly Data into Four Seasonal Datasets
@@ -81,32 +81,32 @@ def season_split(
 
     # save results as an input for CVAE training
     np.save(
-        f"../input/preprocessed_1d_{dataset_type}{scenario}_winter_data_{n_memb}memb.npy",
+        f"./input/preprocessed_1d_{dataset_type}{scenario}_winter_data_{n_memb}memb.npy",
         winter_images,
     )
     np.save(
-        f"../input/preprocessed_1d_{dataset_type}{scenario}_spring_data_{n_memb}memb.npy",
+        f"./input/preprocessed_1d_{dataset_type}{scenario}_spring_data_{n_memb}memb.npy",
         spring_images,
     )
     np.save(
-        f"../input/preprocessed_1d_{dataset_type}{scenario}_summer_data_{n_memb}memb.npy",
+        f"./input/preprocessed_1d_{dataset_type}{scenario}_summer_data_{n_memb}memb.npy",
         summer_images,
     )
     np.save(
-        f"../input/preprocessed_1d_{dataset_type}{scenario}_autumn_data_{n_memb}memb.npy",
+        f"./input/preprocessed_1d_{dataset_type}{scenario}_autumn_data_{n_memb}memb.npy",
         autumn_images,
     )
     pd.DataFrame(winter_time).to_csv(
-        f"../input/dates_{dataset_type}_winter_data_{n_memb}memb.csv"
+        f"./input/dates_{dataset_type}_winter_data_{n_memb}memb.csv"
     )
     pd.DataFrame(spring_time).to_csv(
-        f"../input/dates_{dataset_type}_spring_data_{n_memb}memb.csv"
+        f"./input/dates_{dataset_type}_spring_data_{n_memb}memb.csv"
     )
     pd.DataFrame(summer_time).to_csv(
-        f"../input/dates_{dataset_type}_summer_data_{n_memb}memb.csv"
+        f"./input/dates_{dataset_type}_summer_data_{n_memb}memb.csv"
     )
     pd.DataFrame(autumn_time).to_csv(
-        f"../input/dates_{dataset_type}_autumn_data_{n_memb}memb.csv"
+        f"./input/dates_{dataset_type}_autumn_data_{n_memb}memb.csv"
     )
 
     season_images = [winter_images, spring_images, summer_images, autumn_images]
@@ -130,8 +130,8 @@ test_season_images, test_season_time = season_split(
 # #### 4. Apply to Projection Datasets
 
 for scenario in scenarios:
-    proj_images = np.load(f"../input/preprocessed_2d_proj{scenario}_data_allssp.npy")
-    proj_time = pd.read_csv("../input/dates_proj_data.csv")
+    proj_images = np.load(f"./input/preprocessed_2d_proj{scenario}_data_allssp.npy")
+    proj_time = pd.read_csv("./input/dates_proj_data.csv")
 
     proj_season_images, proj_season_time = season_split(
         proj_images, proj_time, "proj", n_memb, scenario

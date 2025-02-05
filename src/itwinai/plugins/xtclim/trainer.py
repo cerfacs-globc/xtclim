@@ -53,20 +53,20 @@ class TorchTrainer(Trainer):
         seasons = config.get('GENERAL', 'seasons')
 
         # number of members used for the training of the network
-        n_memb = config.get('TRAIN', 'n_memb')
+        n_memb = config.getint('TRAIN', 'n_memb')
 
         # initialize learning parameters
         #lr0 = 0.001
         #batch_size = 64
         #epochs = 100
         #early stopping parameters
-        stop_delta = config.get('TRAIN', 'stop_delta')
+        stop_delta = config.getfloat('TRAIN', 'stop_delta')
         #stop_delta = 0.01  # under 1% improvement consider the model starts converging
-        patience = config.get('TRAIN', 'patience')
+        patience = config.getint('TRAIN', 'patience')
         #patience = 15  # wait for a few epochs to be sure before actually stopping
-        early_count = config.get('TRAIN', 'early_count')
+        early_count = config.getint('TRAIN', 'early_count')
         #early_count = 0  # count when validation loss < stop_delta
-        old_valid_loss = config.get('TRAIN', 'old_valid_loss')
+        old_valid_loss = config.getfloat('TRAIN', 'old_valid_loss')
         #old_valid_loss = 0  # keep track of validation loss at t-1
 
         for season in seasons:
@@ -103,7 +103,7 @@ class TorchTrainer(Trainer):
             # a list to save the loss evolutions
             train_loss = []
             valid_loss = []
-            min_valid_epoch_loss = config.get('TRAIN', 'min_valid_epoch_loss')
+            min_valid_epoch_loss = config.getint('TRAIN', 'min_valid_epoch_loss')
             #min_valid_epoch_loss = 100  # random high value
 
             for epoch in range(self.epochs):
