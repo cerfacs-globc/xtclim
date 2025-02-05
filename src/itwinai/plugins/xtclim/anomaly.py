@@ -5,10 +5,8 @@ from operator import add
 
 from itwinai.plugins.xtclim import model
 from torch.utils.data import DataLoader
-from itwinai.plugins.xtclim import engine
-from engine import evaluate
-from itwinai.plugins.xtclim import initialization
-from initialization import device, beta, criterion, n_avg, pixel_wise_criterion
+from itwinai.plugins.xtclim.engine import evaluate
+from itwinai.plugins.xtclim.initialization import device, beta, criterion, n_avg, pixel_wise_criterion
 
 import configparser as cp
 
