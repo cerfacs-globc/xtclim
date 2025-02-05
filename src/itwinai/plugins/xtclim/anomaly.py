@@ -28,7 +28,7 @@ if past_evaluation:
         
         # load previously trained model
         cvae_model = model.ConvVAE().to(device)
-        cvae_model.load_state_dict(torch.load(f'../outputs/cvae_model_{season}_1d.pth'))
+        cvae_model.load_state_dict(torch.load(f'./outputs/cvae_model_{season}_1d.pth'))
         
         # train set and data loader
         train_time = pd.read_csv(f"../input/dates_train_{season}_data.csv")
@@ -75,8 +75,8 @@ if past_evaluation:
         train_avg_losses = train_avg_losses/n_avg
         test_avg_losses = test_avg_losses/n_avg
         
-        pd.DataFrame(tot_train_losses).to_csv(f"../outputs/train_losses_{season}_1d_allssp.csv")
-        pd.DataFrame(tot_test_losses).to_csv(f"../outputs/test_losses_{season}_1d_allssp.csv")
+        pd.DataFrame(tot_train_losses).to_csv(f"./outputs/train_losses_{season}_1d_allssp.csv")
+        pd.DataFrame(tot_test_losses).to_csv(f"./outputs/test_losses_{season}_1d_allssp.csv")
         print('Train average loss:', train_avg_losses)
         print('Test average loss:', test_avg_losses)
 
@@ -87,7 +87,7 @@ if future_evaluation:
         
         # load previously trained model
         cvae_model = model.ConvVAE().to(device)
-        cvae_model.load_state_dict(torch.load(f'../outputs/cvae_model_{season}_1d.pth'))
+        cvae_model.load_state_dict(torch.load(f'./outputs/cvae_model_{season}_1d.pth'))
 
         for scenario in scenarios:
             
@@ -118,5 +118,5 @@ if future_evaluation:
             proj_avg_losses = proj_avg_losses/n_avg
 
             # save the losses time series
-            pd.DataFrame(tot_proj_losses).to_csv(f"../outputs/proj{scenario}_losses_{season}_1d_allssp.csv")
+            pd.DataFrame(tot_proj_losses).to_csv(f"./outputs/proj{scenario}_losses_{season}_1d_allssp.csv")
             print(f'SSP{scenario} Projection average loss:', proj_avg_losses, 'for', season[:-1])
