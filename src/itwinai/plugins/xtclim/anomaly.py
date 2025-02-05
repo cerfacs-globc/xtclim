@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from operator import add
 
-import model
+from itwinai.plugins.xtclim import model
 from torch.utils.data import DataLoader
 from engine import evaluate
 from initialization import device, beta, criterion, n_avg, pixel_wise_criterion
