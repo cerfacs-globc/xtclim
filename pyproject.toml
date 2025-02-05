@@ -13,3 +13,4 @@ dependencies = ["itwinai","cartopy","cftime","codecarbon","dask","datetime","ima
 # Declare this package as part of the `itwinai.plugins` namespace
 where = ["src"]
 include = ["itwinai.plugins.xtclim"]
+include-package-data = true
