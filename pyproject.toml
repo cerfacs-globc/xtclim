@@ -7,7 +7,7 @@ name = "itwinai-xtclim-plugin"
 version = "0.1.0"
 description = "xtclim plugin for itwinai"
 authors = [{ name = "Christian Page", email = "christian.page@cerfacs.fr" }]
-dependencies = ["itwinai","cartopy","cftime","codecarbon","dask","datetime","imageio","ipykernel","matplotlib","numpy","pandas","torch","torchvision","tqdm","urllib3==1.26.13","xarray","netCDF4","h5netcdf"]
+dependencies = ["itwinai","cartopy","cftime","codecarbon","dask","datetime","imageio","ipykernel","matplotlib","numpy","pandas","torch","torchvision","tqdm","urllib3","xarray","netCDF4","h5netcdf"]
 
 [tool.setuptools.packages.find]
 # Declare this package as part of the `itwinai.plugins` namespace
