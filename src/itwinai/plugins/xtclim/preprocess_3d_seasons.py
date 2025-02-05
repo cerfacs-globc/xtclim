@@ -25,7 +25,7 @@ n_memb = config.getint('TRAIN', 'n_memb')
 
 # define relevant scenarios
 #scenarios = ["126", "245", "370", "585"]
-scenarios = config.getint('GENERAL', 'scenarios')
+scenarios = json.loads(config.getint('GENERAL', 'scenarios'))
 
 # Load preprocessed "daily temperature images" and time series
 

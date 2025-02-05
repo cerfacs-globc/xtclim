@@ -242,7 +242,7 @@ class PreprocessData(DataGetter):
         # IPCC scenarios: SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5
         # choose among "126", "245", "370", "585"
         # scenario = self.scenario
-        scenarios = config.getint('GENERAL', 'scenarios')
+        scenarios = json.loads(config.getint('GENERAL', 'scenarios'))
         
         for scenario in scenarios:
 
