@@ -15,4 +15,4 @@ where = ["src"]
 include = ["itwinai.plugins.xtclim"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "ipynb"]
+"*" = ["*.json", "*.yaml", "*.ipynb"]
