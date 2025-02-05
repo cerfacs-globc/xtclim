@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
+import json
 from operator import add
 
 from itwinai.plugins.xtclim import model
@@ -16,7 +17,7 @@ config.read('xtclim.json')
 
 # pick the season to study among:
 # '' (none, i.e. full dataset), 'winter_', 'spring_', 'summer_', 'autumn_'
-seasons = config.get('GENERAL', 'seasons')
+seasons = json.loads(config.get('GENERAL', 'seasons'))
 
 # choose wether to evaluate train and test data, and/or projections
 past_evaluation = config.get('MODEL', 'past_evaluation')
@@ -82,7 +83,7 @@ if past_evaluation:
 
 
 if future_evaluation:
-    scenarios = config.get('GENERAL', 'scenarios')
+    scenarios = json.loads(config.get('GENERAL', 'scenarios'))
     for season in seasons:
         
         # load previously trained model

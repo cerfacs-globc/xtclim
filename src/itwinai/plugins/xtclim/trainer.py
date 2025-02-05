@@ -18,6 +18,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 import pandas as pd
+import json
 
 from itwinai.components import Trainer, monitor_exec
 import model
@@ -50,7 +51,7 @@ class TorchTrainer(Trainer):
         # pick the season to study among:
         # '' (none, i.e. full dataset), 'winter_', 'spring_', 'summer_', 'autumn_'
         #seasons = ["winter_", "spring_", "summer_", "autumn_"]
-        seasons = config.get('GENERAL', 'seasons')
+        seasons = json.loads(config.get('GENERAL', 'seasons'))
 
         # number of members used for the training of the network
         n_memb = config.getint('TRAIN', 'n_memb')
