@@ -1,0 +1,78 @@
+[GENERAL]
+; pick the season to study among:
+; "" (none, i.e. full dataset), "winter", "spring", "summer", "autumn"
+seasons = ["winter", "spring", "summer", "autumn"]
+
+; SSP scenarios
+;scenarios = ['585', '370', '245', '126']
+scenarios = ['245']
+
+; Data directory
+datadir = ./data
+
+; Variable
+var_extr = tasmax
+
+; Input Files
+;
+; Historical
+;
+histo_extr = ["tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19500101-19741231.nc", "tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19750101-19991231.nc", "tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_20000101-20141231.nc"]
+
+scenario_extr_585 = ["tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20150101-20391231.nc", "tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20400101-20641231.nc", "tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20650101-20891231.nc", "tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20900101-21001231.nc"]
+scenario_extr_370 = ["tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20150101-20391231.nc", "tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20400101-20641231.nc", "tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20650101-20891231.nc", "tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20900101-21001231.nc"]
+scenario_extr_245 = ["tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20150101-20391231.nc", "tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20400101-20641231.nc", "tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20650101-20891231.nc", "tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20900101-21001231.nc"]
+scenario_extr_126 = ["tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20150101-20391231.nc", "tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20400101-20641231.nc", "tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20650101-20891231.nc", "tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20900101-21001231.nc"]
+
+landsea_mask = sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc
+
+; Geographical region bounding box
+min_lon = -10
+max_lon = 29
+min_lat = 36
+max_lat = 66
+
+[TRAIN]
+; number of members used for the training of the network
+n_memb = 1
+
+; initialize learning parameters
+; lr0 = 0.001
+; batch_size = 64
+; epochs = 100
+; early stopping parameters
+; under 1% improvement consider the model starts converging
+stop_delta = 0.01
+; wait for a few epochs to be sure before actually stopping
+patience = 15
+; count when validation loss < stop_delta
+early_count = 0
+; keep track of validation loss at t-1
+old_valid_loss = 0
+
+; random high value
+min_valid_epoch_loss = 100
+
+
+[MODEL]
+; (4, 4) kernel
+kernel_size = 4
+; initial number of filters
+init_channels = 8
+; 1 channel/variable: max temperature, precipitation, wind
+image_channels = 2
+; latent space dimension (in which the image is compressed)
+latent_dim = 128
+
+; KL divergence handles dispersion of information in latent space
+; a balance is to be found with the prevailing reconstruction error
+beta = 0.1
+
+; number of evaluations for each dataset
+n_avg = 20
+
+; choose wether to evaluate train and test data, and/or projections
+past_evaluation = False
+future_evaluation = True
+
+anomaly_percent = 99
