@@ -31,7 +31,12 @@ dependencies = [
 [tool.setuptools.packages.find]
 # Declare this package as part of the `itwinai.plugins` namespace
 where = ["src"]
-include = ["itwinai.plugins.xtclim"]
+# Add plugin subfolders explicitly here
+include = [
+    "itwinai.plugins.xtclim",
+    "itwinai.plugins.xtclim.src",
+    "itwinai.plugins.xtclim.preprocessing",
+]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.ipynb"]
