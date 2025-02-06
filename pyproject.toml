@@ -30,7 +30,7 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 # Declare this package as part of the `itwinai.plugins` namespace
-where = ["src", "etc"]
+where = ["src"]
 include = ["itwinai.plugins.xtclim"]
 
 [tool.setuptools.package-data]
