@@ -11,7 +11,7 @@ dependencies = ["itwinai","cartopy","cftime","codecarbon","dask","datetime","ima
 
 [tool.setuptools.packages.find]
 # Declare this package as part of the `itwinai.plugins` namespace
-where = ["src","etc","src/itwinai/plugins/xtclim/src","src/itwinai/plugins/xtclim/preprocessing"]
+where = ["src","etc"]
 include = ["itwinai.plugins.xtclim"]
 
 [tool.setuptools.package-data]
