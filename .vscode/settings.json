@@ -14,7 +14,7 @@
   "[python]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit",
+      "source.fixAll": "explicit"
     }
   },
   "ruff.organizeImports": true,
