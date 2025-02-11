@@ -21,12 +21,12 @@ import pandas as pd
 import json
 
 from itwinai.components import Trainer, monitor_exec
-from itwinai.plugins.xtclim import model
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
-from itwinai.plugins.xtclim.engine import train, validate
-from itwinai.plugins.xtclim.utils import save_reconstructed_images, save_loss_plot, save_ex
-from itwinai.plugins.xtclim.initialization import device, beta, criterion
+from itwinai.plugins.xtclim.src import model
+from itwinai.plugins.xtclim.src.engine import train, validate
+from itwinai.plugins.xtclim.src.utils import save_reconstructed_images, save_loss_plot, save_ex
+from itwinai.plugins.xtclim.src.initialization import device, beta, criterion
 
 import configparser as cp
 

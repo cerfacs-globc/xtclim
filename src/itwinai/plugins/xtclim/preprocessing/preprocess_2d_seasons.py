@@ -10,21 +10,20 @@
 
 # #### 0. Libraries
 
+import configparser as cp
+
 import numpy as np
 import pandas as pd
-import configparser as cp
 
 from itwinai.components import DataGetter, monitor_exec
 
+
 class SplitPreprocessedData(DataGetter):
-    def __init__(
-            self,
-            scenario: str
-    ):
+    def __init__(self, scenario: str):
         super().__init__()
         self.scenario = scenario
 
-    ##### 2. Split Yearly Data into Four Seasonal Datasets
+    # #### 2. Split Yearly Data into Four Seasonal Datasets
     # split daily data into seasons
     def season_split(
         self,
@@ -103,17 +102,17 @@ class SplitPreprocessedData(DataGetter):
 
     @monitor_exec
     def execute(self):
-        #### Configuration file
+        # ### Configuration file
         config = cp.ConfigParser()
-        config.read('xtclim.json')
+        config.read("xtclim.json")
 
-        ##### 1. Load Data to xarray
+        # #### 1. Load Data to xarray
 
         # choose the needed number of members
-        n_memb = config.get('TRAIN', 'n_memb')
+        n_memb = config.get("TRAIN", "n_memb")
 
         # define relevant scenarios
-        #scenarios = ["126", "245", "370", "585"]
+        # scenarios = ["126", "245", "370", "585"]
         scenarios = [self.scenario]
         # Load preprocessed "daily temperature images" and time series
 
@@ -122,8 +121,7 @@ class SplitPreprocessedData(DataGetter):
         train_time = pd.read_csv("input/dates_train_data.csv")
         test_time = pd.read_csv("input/dates_test_data.csv")
 
-
-        ##### 3. Apply to Train and Test Datasets
+        # #### 3. Apply to Train and Test Datasets
         train_season_images, train_season_time = self.season_split(
             train_images, train_time, "train", n_memb
         )
@@ -132,8 +130,7 @@ class SplitPreprocessedData(DataGetter):
             test_images, test_time, "test", n_memb
         )
 
-
-        ##### 4. Apply to Projection Datasets
+        # #### 4. Apply to Projection Datasets
 
         for scenario in scenarios:
             proj_images = np.load(f"input/preprocessed_2d_proj{scenario}_data_allssp.npy")

@@ -10,22 +10,24 @@
 
 # #### 0. Libraries
 
+import configparser as cp
+import json
+
 import numpy as np
 import pandas as pd
-import configparser as cp
 
-#### Configuration file
+# #### Configuration file
 config = cp.ConfigParser()
-config.read('xtclim.json')
+config.read("xtclim.json")
 
 # #### 1. Load Data to xarray
 
 # choose the needed number of members
-n_memb = config.getint('TRAIN', 'n_memb')
+n_memb = config.getint("TRAIN", "n_memb")
 
 # define relevant scenarios
-#scenarios = ["126", "245", "370", "585"]
-scenarios = json.loads(config.getint('GENERAL', 'scenarios'))
+# scenarios = ["126", "245", "370", "585"]
+scenarios = json.loads(config.getint("GENERAL", "scenarios"))
 
 # Load preprocessed "daily temperature images" and time series
 
@@ -122,9 +124,7 @@ train_season_images, train_season_time = season_split(
 )
 
 
-test_season_images, test_season_time = season_split(
-    test_images, test_time, "test", n_memb
-)
+test_season_images, test_season_time = season_split(test_images, test_time, "test", n_memb)
 
 
 # #### 4. Apply to Projection Datasets
