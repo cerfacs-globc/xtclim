@@ -36,8 +36,8 @@ where = ["src"]
 # Add plugin subfolders explicitly here
 include = [
     "itwinai.plugins.xtclim",
-    # "itwinai.plugins.xtclim.src",
-    # "itwinai.plugins.xtclim.preprocessing",
+    "itwinai.plugins.xtclim.src",
+    "itwinai.plugins.xtclim.preprocessing",
 ]
 
 [tool.setuptools.package-data]
