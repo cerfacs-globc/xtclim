@@ -39,22 +39,23 @@ class TorchTrainer(Trainer):
 
         # ### Configuration file
         self.config = cp.ConfigParser()
-        self.config.read(self.config_path)
+        self.config.read(config_path)
 
-        self.epochs = self.config.getint("MODEL", "epochs")
-        self.batch_size = self.config.getint("MODEL", "batch_size")
-        self.lr = self.config.getfloat("MODEL", "lr")
-        self.input_path = json.loads(self.config.get("GENERAL", "input_path"))
-        self.output_path = json.loads(self.config.get("GENERAL", "output_path"))
+        self.epochs = self.config.getint("TRAIN", "epochs")
+        self.batch_size = self.config.getint("TRAIN", "batch_size")
+        self.lr = self.config.getfloat("TRAIN", "lr")
 
     @monitor_exec
     def execute(self):
+        # Load input and output data
+        self.input_path = json.loads(self.config.get("GENERAL", "input_path"))
+        self.output_path = json.loads(self.config.get("GENERAL", "output_path"))
 
         # KL divergence handles dispersion of information in latent space
         # a balance is to be found with the prevailing reconstruction error
         beta = self.config.getfloat("MODEL", "beta")
         # beta = 0.1
-        
+
         # number of evaluations for each dataset
         n_avg = self.config.getint("MODEL", "n_avg")
         # n_avg = 20
@@ -89,8 +90,12 @@ class TorchTrainer(Trainer):
             optimizer = optim.Adam(cvae_model.parameters(), lr=self.lr)
 
             # load training set and train data
-            train_time = pd.read_csv(self.input_path+f"/dates_train_{season}_data_{n_memb}memb.csv")
-            train_data = np.load(self.input_path+f"/preprocessed_1d_train_{season}_data_{n_memb}memb.npy")
+            train_time = pd.read_csv(
+                self.input_path + f"/dates_train_{season}_data_{n_memb}memb.csv"
+            )
+            train_data = np.load(
+                self.input_path + f"/preprocessed_1d_train_{season}_data_{n_memb}memb.npy"
+            )
             n_train = len(train_data)
             trainset = [
                 (torch.from_numpy(np.reshape(train_data[i], (2, 32, 32))), train_time["0"][i])
@@ -100,8 +105,12 @@ class TorchTrainer(Trainer):
             trainloader = DataLoader(trainset, batch_size=self.batch_size, shuffle=True)
 
             # load validation set and validation data
-            test_time = pd.read_csv(self.input_path+f"/dates_test_{season}_data_{n_memb}memb.csv")
-            test_data = np.load(self.input_path+f"/preprocessed_1d_test_{season}_data_{n_memb}memb.npy")
+            test_time = pd.read_csv(
+                self.input_path + f"/dates_test_{season}_data_{n_memb}memb.csv"
+            )
+            test_data = np.load(
+                self.input_path + f"/preprocessed_1d_test_{season}_data_{n_memb}memb.npy"
+            )
             n_test = len(test_data)
             testset = [
                 (torch.from_numpy(np.reshape(test_data[i], (2, 32, 32))), test_time["0"][i])
@@ -176,7 +185,7 @@ class TorchTrainer(Trainer):
             min_valid_epoch_loss = valid_epoch_loss
             torch.save(
                 cvae_model.state_dict(),
-                self.output_path+f"/cvae_model_{season}_1d_{n_memb}memb.pth",
+                self.output_path + f"/cvae_model_{season}_1d_{n_memb}memb.pth",
             )
 
             print(f"Train Loss: {train_epoch_loss:.4f}")
@@ -185,10 +194,10 @@ class TorchTrainer(Trainer):
             save_loss_plot(train_loss, valid_loss, season, self.output_path)
             # save the loss evolutions
             pd.DataFrame(train_loss).to_csv(
-                self.output_path+f"/train_loss_indiv_{season}_1d_{n_memb}memb.csv"
+                self.output_path + f"/train_loss_indiv_{season}_1d_{n_memb}memb.csv"
             )
             pd.DataFrame(valid_loss).to_csv(
-                self.output_path+f"/test_loss_indiv_{season}_1d_{n_memb}memb.csv"
+                self.output_path + f"/test_loss_indiv_{season}_1d_{n_memb}memb.csv"
             )
 
         # emissions = tracker.stop()

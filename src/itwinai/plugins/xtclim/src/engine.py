@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 
+
 def final_loss(bce_loss, mu, logvar, beta=0.1):
     """
     Adds up reconstruction loss (BCELoss) and Kullback-Leibler divergence.

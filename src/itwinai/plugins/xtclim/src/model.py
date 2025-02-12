@@ -18,11 +18,11 @@ class ConvVAE(nn.Module):
         super(ConvVAE, self).__init__()
 
         self.config_path = config_path
-        
+
         # Configuration file
         config = cp.ConfigParser()
-        config.read(self.config_path))
-        
+        config.read(self.config_path)
+
         kernel_size = config.getint("MODEL", "kernel_size")
         # kernel_size = 4 # (4, 4) kernel
         init_channels = config.getint("MODEL", "init_channels")
@@ -31,7 +31,7 @@ class ConvVAE(nn.Module):
         # image_channels = 2 # 1 channel/variable: max temperature, precipitation, wind
         latent_dim = config.getint("MODEL", "latent_dim")
         # latent_dim = 128 # latent space dimension (in which the image is compressed)
-        
+
         # encoder
         self.enc1 = nn.Conv2d(
             in_channels=image_channels,

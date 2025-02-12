@@ -27,7 +27,7 @@ class SplitPreprocessedData(DataGetter):
         self.config = cp.ConfigParser()
         self.config.read(self.config_path)
 
-        self.input_path = config.get("GENERAL", "input_path")
+        self.input_path = self.config.get("GENERAL", "input_path")
 
     # #### 2. Split Yearly Data into Four Seasonal Datasets
     # split daily data into seasons
@@ -37,7 +37,6 @@ class SplitPreprocessedData(DataGetter):
         time: pd.DataFrame,
         dataset_type: str,
         n_memb: int,
-            
     ) -> tuple[list[np.ndarray], list[pd.DataFrame]]:
         """
         Splits and returns the data sets (climate variable and time) per season.
@@ -73,32 +72,36 @@ class SplitPreprocessedData(DataGetter):
 
         # save results as an input for CVAE training
         np.save(
-            self.input_path+f"/preprocessed_1d_{dataset_type}{self.scenario}_winter_data_{n_memb}memb.npy",
+            self.input_path
+            + f"/preprocessed_1d_{dataset_type}{self.scenario}_winter_data_{n_memb}memb.npy",
             winter_images,
         )
         np.save(
-            self.input_path+f"/preprocessed_1d_{dataset_type}{self.scenario}_spring_data_{n_memb}memb.npy",
+            self.input_path
+            + f"/preprocessed_1d_{dataset_type}{self.scenario}_spring_data_{n_memb}memb.npy",
             spring_images,
         )
         np.save(
-            self.input_path+f"/preprocessed_1d_{dataset_type}{self.scenario}_summer_data_{n_memb}memb.npy",
+            self.input_path
+            + f"/preprocessed_1d_{dataset_type}{self.scenario}_summer_data_{n_memb}memb.npy",
             summer_images,
         )
         np.save(
-            self.input_path+f"/preprocessed_1d_{dataset_type}{self.scenario}_autumn_data_{n_memb}memb.npy",
+            self.input_path
+            + f"/preprocessed_1d_{dataset_type}{self.scenario}_autumn_data_{n_memb}memb.npy",
             autumn_images,
         )
         pd.DataFrame(winter_time).to_csv(
-            self.input_path+f"/dates_{dataset_type}_winter_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_winter_data_{n_memb}memb.csv"
         )
         pd.DataFrame(spring_time).to_csv(
-            self.input_path+f"/dates_{dataset_type}_spring_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_spring_data_{n_memb}memb.csv"
         )
         pd.DataFrame(summer_time).to_csv(
-            self.input_path+f"/dates_{dataset_type}_summer_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_summer_data_{n_memb}memb.csv"
         )
         pd.DataFrame(autumn_time).to_csv(
-            self.input_path+f"/dates_{dataset_type}_autumn_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_autumn_data_{n_memb}memb.csv"
         )
 
         season_images = [winter_images, spring_images, summer_images, autumn_images]
@@ -118,10 +121,10 @@ class SplitPreprocessedData(DataGetter):
         scenarios = json.loads(self.config.getint("GENERAL", "scenarios"))
         # Load preprocessed "daily temperature images" and time series
 
-        train_images = np.load(self.input_path+"/preprocessed_2d_train_data_allssp.npy")
-        test_images = np.load(self.input_path+"/preprocessed_2d_test_data_allssp.npy")
-        train_time = pd.read_csv(self.input_path+"/dates_train_data.csv")
-        test_time = pd.read_csv(self.input_path+"/dates_test_data.csv")
+        train_images = np.load(self.input_path + "/preprocessed_2d_train_data_allssp.npy")
+        test_images = np.load(self.input_path + "/preprocessed_2d_test_data_allssp.npy")
+        train_time = pd.read_csv(self.input_path + "/dates_train_data.csv")
+        test_time = pd.read_csv(self.input_path + "/dates_test_data.csv")
 
         # #### 3. Apply to Train and Test Datasets
         train_season_images, train_season_time = self.season_split(
@@ -135,8 +138,10 @@ class SplitPreprocessedData(DataGetter):
         # #### 4. Apply to Projection Datasets
 
         for scenario in scenarios:
-            proj_images = np.load(self.input_path+f"/preprocessed_2d_proj{scenario}_data_allssp.npy")
-            proj_time = pd.read_csv(self.input_path+"/dates_proj_data.csv")
+            proj_images = np.load(
+                self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy"
+            )
+            proj_time = pd.read_csv(self.input_path + "/dates_proj_data.csv")
 
             proj_season_images, proj_season_time = self.season_split(
                 proj_images, proj_time, "proj", n_memb

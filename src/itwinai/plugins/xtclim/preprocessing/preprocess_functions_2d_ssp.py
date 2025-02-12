@@ -31,9 +31,9 @@ class PreprocessData(DataGetter):
         self.config = cp.ConfigParser()
         self.config.read(self.config_path)
 
-        self.dataset_root = config.get("GENERAL", "dataset_root")
-        self.input_path = config.get("GENERAL", "input_path")
-        self.output_path = config.get("GENERAL", "output_path")
+        self.dataset_root = self.config.get("GENERAL", "dataset_root")
+        self.input_path = self.config.get("GENERAL", "input_path")
+        self.output_path = self.config.get("GENERAL", "output_path")
 
     def xr_to_ndarray(
         self, xr_dset: xr.Dataset, sq_coords: dict
@@ -241,10 +241,10 @@ class PreprocessData(DataGetter):
         total_test = self.ndarray_to_2d(test_atmosfield, land_prop)
 
         # Save train and test data sets
-        np.save(self.input_path+"/preprocessed_2d_train_data_allssp.npy", total_train)
-        np.save(self.input_path+"/preprocessed_2d_test_data_allssp.npy", total_test)
-        pd.DataFrame(train_time).to_csv(self.input_path+"/dates_train_data.csv")
-        pd.DataFrame(test_time).to_csv(self.input_path+"/dates_test_data.csv")
+        np.save(self.input_path + "/preprocessed_2d_train_data_allssp.npy", total_train)
+        np.save(self.input_path + "/preprocessed_2d_test_data_allssp.npy", total_test)
+        pd.DataFrame(train_time).to_csv(self.input_path + "/dates_train_data.csv")
+        pd.DataFrame(test_time).to_csv(self.input_path + "/dates_test_data.csv")
 
         # Projection Datasets
         # regrouped by climate variable
@@ -288,5 +288,8 @@ class PreprocessData(DataGetter):
             # #### 7. Save Results
 
             # Save projection data for one scenario
-            np.save(self.input_path+f"/preprocessed_2d_proj{scenario}_data_allssp.npy", total_proj)
-            pd.DataFrame(time_proj).to_csv(self.input_path+"/dates_proj{scenario}_data.csv")
+            np.save(
+                self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy",
+                total_proj,
+            )
+            pd.DataFrame(time_proj).to_csv(self.input_path + "/dates_proj{scenario}_data.csv")

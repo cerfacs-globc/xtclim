@@ -1,5 +1,5 @@
 # General configuration
-config_path: '/Users/page/Documents/projets/interTwin/xtclim_env/xtclim.json'
+config_path: 'xtclim.json'
 
 # Workflows
 pipeline:

@@ -43,7 +43,7 @@ max_lat = 66
 n_memb = 1
 
 ; initialize learning parameters
-lr0 = 0.001
+lr = 0.001
 batch_size = 10
 ;batch_size = 64
 epochs = 3

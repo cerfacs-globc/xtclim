@@ -11,16 +11,16 @@ from itwinai.plugins.xtclim.src import model
 from itwinai.plugins.xtclim.src.engine import evaluate
 from itwinai.plugins.xtclim.src.initialization import initialization
 
+
 def anomaly(config_path="./xtclim.json", input_path="./input", output_path="./outputs"):
-    
     # Configuration file
     config = cp.ConfigParser()
     config.read(config_path)
-    
+
     # pick the season to study among:
     # '' (none, i.e. full dataset), 'winter_', 'spring_', 'summer_', 'autumn_'
     seasons = json.loads(config.get("GENERAL", "seasons"))
-    
+
     # choose wether to evaluate train and test data, and/or projections
     past_evaluation = config.get("MODEL", "past_evaluation")
     future_evaluation = config.get("MODEL", "future_evaluation")
@@ -28,18 +28,22 @@ def anomaly(config_path="./xtclim.json", input_path="./input", output_path="./ou
     # number of evaluations for each dataset
     n_avg = config.getint("MODEL", "n_avg")
     # n_avg = 20
-    
+
     device, criterion, pixel_wise_criterion = initialization(self.config_path)
-    
+
     if past_evaluation:
         for season in seasons:
             # load previously trained model
             cvae_model = model.ConvVAE().to(device)
-            cvae_model.load_state_dict(torch.load(output_path+f"/cvae_model_{season}_1d.pth"))
+            cvae_model.load_state_dict(
+                torch.load(output_path + f"/cvae_model_{season}_1d.pth")
+            )
 
             # train set and data loader
-            train_time = pd.read_csv(input_path+f"/dates_train_{season}_data.csv")
-            train_data = np.load(input_path+f"/preprocessed_1d_train_{season}_data_allssp.npy")
+            train_time = pd.read_csv(input_path + f"/dates_train_{season}_data.csv")
+            train_data = np.load(
+                input_path + f"/preprocessed_1d_train_{season}_data_allssp.npy"
+            )
             n_train = len(train_data)
             trainset = [
                 (
@@ -51,8 +55,8 @@ def anomaly(config_path="./xtclim.json", input_path="./input", output_path="./ou
             trainloader = DataLoader(trainset, batch_size=1, shuffle=False)
 
             # test set and data loader
-            test_time = pd.read_csv(input_path+f"/dates_test_{season}_data.csv")
-            test_data = np.load(input_path+f"/preprocessed_1d_test_{season}_data_allssp.npy")
+            test_time = pd.read_csv(input_path + f"/dates_test_{season}_data.csv")
+            test_data = np.load(input_path + f"/preprocessed_1d_test_{season}_data_allssp.npy")
             n_test = len(test_data)
             testset = [
                 (torch.from_numpy(np.reshape(test_data[i], (3, 32, 32))), test_time["0"][i])
@@ -89,24 +93,29 @@ def anomaly(config_path="./xtclim.json", input_path="./input", output_path="./ou
             train_avg_losses = train_avg_losses / n_avg
             test_avg_losses = test_avg_losses / n_avg
 
-            pd.DataFrame(tot_train_losses).to_csv(output_path+f"/train_losses_{season}_1d_allssp.csv")
-            pd.DataFrame(tot_test_losses).to_csv(output_path+f"/test_losses_{season}_1d_allssp.csv")
+            pd.DataFrame(tot_train_losses).to_csv(
+                output_path + f"/train_losses_{season}_1d_allssp.csv"
+            )
+            pd.DataFrame(tot_test_losses).to_csv(
+                output_path + f"/test_losses_{season}_1d_allssp.csv"
+            )
             print("Train average loss:", train_avg_losses)
             print("Test average loss:", test_avg_losses)
-
 
     if future_evaluation:
         scenarios = json.loads(config.get("GENERAL", "scenarios"))
         for season in seasons:
             # load previously trained model
             cvae_model = model.ConvVAE().to(device)
-            cvae_model.load_state_dict(torch.load(output_path+f"/cvae_model_{season}_1d.pth"))
+            cvae_model.load_state_dict(
+                torch.load(output_path + f"/cvae_model_{season}_1d.pth")
+            )
 
             for scenario in scenarios:
                 # projection set and data loader
-                proj_time = pd.read_csv(input_path+f"/dates_proj_{season}_data.csv")
+                proj_time = pd.read_csv(input_path + f"/dates_proj_{season}_data.csv")
                 proj_data = np.load(
-                    input_path+f"/preprocessed_1d_proj{scenario}_{season}_data_allssp.npy"
+                    input_path + f"/preprocessed_1d_proj{scenario}_{season}_data_allssp.npy"
                 )
                 n_proj = len(proj_data)
                 projset = [
@@ -141,7 +150,7 @@ def anomaly(config_path="./xtclim.json", input_path="./input", output_path="./ou
 
                 # save the losses time series
                 pd.DataFrame(tot_proj_losses).to_csv(
-                    output_path+f"/proj{scenario}_losses_{season}_1d_allssp.csv"
+                    output_path + f"/proj{scenario}_losses_{season}_1d_allssp.csv"
                 )
                 print(
                     f"SSP{scenario} Projection average loss:",
