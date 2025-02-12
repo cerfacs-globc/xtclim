@@ -11,6 +11,7 @@
 
 # #### 0. Libraries
 
+import os
 from typing import Dict, List
 
 import cftime
@@ -58,6 +59,9 @@ class PreprocessData(DataGetter):
         self.max_lat = max_lat
         self.scenarios = scenarios
         self.scenario_extr = scenario_extr
+
+        os.makedirs(self.input_path, exist_ok=True)
+        os.makedirs(self.output_path, exist_ok=True)
 
     def xr_to_ndarray(
         self, xr_dset: xr.Dataset, sq_coords: dict

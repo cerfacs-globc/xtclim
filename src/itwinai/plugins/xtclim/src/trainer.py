@@ -48,6 +48,10 @@ class TorchTrainer(Trainer):
         early_count: int = 0,
         old_valid_loss: float = 0.0,
         min_valid_epoch_loss: float = 100.0,
+        kernel_size: int = 4,
+        init_channels: int = 8,
+        image_channels: int = 2,
+        latent_dim: int = 128,
     ):
         super().__init__()
         self.input_path = input_path
@@ -64,14 +68,26 @@ class TorchTrainer(Trainer):
         self.seasons = seasons
         self.n_memb = n_memb
         self.min_valid_epoch_loss = min_valid_epoch_loss
+        # Model parameters
+        self.kernel_size = kernel_size
+        self.init_channels = init_channels
+        self.image_channels = image_channels
+        self.latent_dim = latent_dim
 
     @monitor_exec
     def execute(self):
         device, criterion, _ = initialization()
 
         for season in self.seasons:
+            print(f"Training season: {season}")
+            
             # initialize the model
-            cvae_model = model.ConvVAE().to(device)
+            cvae_model = model.ConvVAE(
+                kernel_size=self.kernel_size,
+                init_channels=self.init_channels,
+                image_channels=self.image_channels,
+                latent_dim=self.latent_dim,
+            ).to(device)
             optimizer = optim.Adam(cvae_model.parameters(), lr=self.lr)
 
             # load training set and train data

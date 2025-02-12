@@ -9,13 +9,13 @@ GENERAL:
   scenarios: [245]
 
   # Data directory
-  dataset_root: /mnt/mbunino/data # /Users/page/Documents/projets/interTwin/xtclim_env/data
+  dataset_root: /Users/page/Documents/projets/interTwin/xtclim_env/data
 
   # Input path
-  input_path: input # /Users/page/Documents/projets/interTwin/xtclim_env/input
+  input_path: /Users/page/Documents/projets/interTwin/xtclim_env/input
 
   # Output path
-  output_path: output #/Users/page/Documents/projets/interTwin/xtclim_env/outputs
+  output_path: /Users/page/Documents/projets/interTwin/xtclim_env/outputs
 
   # Variable
   var_extr: tasmax
@@ -150,3 +150,8 @@ pipeline:
             early_count: ${TRAIN.early_count}
             old_valid_loss: ${TRAIN.old_valid_loss}
             min_valid_epoch_loss: ${TRAIN.min_valid_epoch_loss}
+            # Model parameters
+            kernel_size: ${MODEL.kernel_size}
+            init_channels: ${MODEL.init_channels}
+            image_channels: ${MODEL.image_channels}
+            latent_dim: ${MODEL.latent_dim}

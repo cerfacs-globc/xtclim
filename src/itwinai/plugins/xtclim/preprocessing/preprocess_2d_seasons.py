@@ -32,7 +32,7 @@ class SplitPreprocessedData(DataGetter):
         images: np.ndarray,
         time: pd.DataFrame,
         dataset_type: str,
-        n_memb: int,
+        scenario: str = "",
     ) -> tuple[list[np.ndarray], list[pd.DataFrame]]:
         """
         Splits and returns the data sets (climate variable and time) per season.
@@ -69,35 +69,35 @@ class SplitPreprocessedData(DataGetter):
         # save results as an input for CVAE training
         np.save(
             self.input_path
-            + f"/preprocessed_1d_{dataset_type}{self.scenario}_winter_data_{n_memb}memb.npy",
+            + f"/preprocessed_1d_{dataset_type}{scenario}_winter_data_{self.n_memb}memb.npy",
             winter_images,
         )
         np.save(
             self.input_path
-            + f"/preprocessed_1d_{dataset_type}{self.scenario}_spring_data_{n_memb}memb.npy",
+            + f"/preprocessed_1d_{dataset_type}{scenario}_spring_data_{self.n_memb}memb.npy",
             spring_images,
         )
         np.save(
             self.input_path
-            + f"/preprocessed_1d_{dataset_type}{self.scenario}_summer_data_{n_memb}memb.npy",
+            + f"/preprocessed_1d_{dataset_type}{scenario}_summer_data_{self.n_memb}memb.npy",
             summer_images,
         )
         np.save(
             self.input_path
-            + f"/preprocessed_1d_{dataset_type}{self.scenario}_autumn_data_{n_memb}memb.npy",
+            + f"/preprocessed_1d_{dataset_type}{scenario}_autumn_data_{self.n_memb}memb.npy",
             autumn_images,
         )
         pd.DataFrame(winter_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_winter_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_winter_data_{self.n_memb}memb.csv"
         )
         pd.DataFrame(spring_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_spring_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_spring_data_{self.n_memb}memb.csv"
         )
         pd.DataFrame(summer_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_summer_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_summer_data_{self.n_memb}memb.csv"
         )
         pd.DataFrame(autumn_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_autumn_data_{n_memb}memb.csv"
+            self.input_path + f"/dates_{dataset_type}_autumn_data_{self.n_memb}memb.csv"
         )
 
         season_images = [winter_images, spring_images, summer_images, autumn_images]
@@ -117,21 +117,28 @@ class SplitPreprocessedData(DataGetter):
 
         # #### 3. Apply to Train and Test Datasets
         train_season_images, train_season_time = self.season_split(
-            train_images, train_time, "train", self.n_memb
+            images=train_images,
+            time=train_time,
+            dataset_type="train",
         )
 
         test_season_images, test_season_time = self.season_split(
-            test_images, test_time, "test", self.n_memb
+            images=test_images,
+            time=test_time,
+            dataset_type="test",
         )
 
-        # #### 4. Apply to Projection Datasets
+        # # #### 4. Apply to Projection Datasets
 
-        for scenario in self.scenarios:
-            proj_images = np.load(
-                self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy"
-            )
-            proj_time = pd.read_csv(self.input_path + "/dates_proj_data.csv")
+        # for scenario in self.scenarios:
+        #     proj_images = np.load(
+        #         self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy"
+        #     )
+        #     proj_time = pd.read_csv(self.input_path + "/dates_proj_data.csv")
 
-            proj_season_images, proj_season_time = self.season_split(
-                proj_images, proj_time, "proj", self.n_memb
-            )
+        #     proj_season_images, proj_season_time = self.season_split(
+        #         images=proj_images,
+        #         time=proj_time,
+        #         dataset_type="proj",
+        #         scenario=scenario,
+        #     )

@@ -43,6 +43,21 @@ You can launch it from the root of the repository with:
 itwinai exec-pipeline --config config.yaml
 ```
 
+To dynamically override some (nested) fields from terminal you can do:
+
+```bash
+itwinai exec-pipeline --config config.yaml \
+    -o GENERAL.dataset_root=/path/to/data \
+    -o GENERAL.input_path=input \
+    -o GENERAL.output_path=output
+```
+
+To run only some steps, e.g., only training step after the training dataset has been generated, use:
+
+```bash
+itwinai exec-pipeline --config config.yaml --steps training-step
+```
+
 ## TODOs
 
 Integration of post-processing step + distributed strategies
