@@ -9,13 +9,13 @@ GENERAL:
   scenarios: [245]
 
   # Data directory
-  dataset_root: /Users/page/Documents/projets/interTwin/xtclim_env/data
+  dataset_root: /mnt/mbunino/data # /Users/page/Documents/projets/interTwin/xtclim_env/data
 
   # Input path
-  input_path: /Users/page/Documents/projets/interTwin/xtclim_env/input
+  input_path: input # /Users/page/Documents/projets/interTwin/xtclim_env/input
 
   # Output path
-  output_path: /Users/page/Documents/projets/interTwin/xtclim_env/outputs
+  output_path: output #/Users/page/Documents/projets/interTwin/xtclim_env/outputs
 
   # Variable
   var_extr: tasmax

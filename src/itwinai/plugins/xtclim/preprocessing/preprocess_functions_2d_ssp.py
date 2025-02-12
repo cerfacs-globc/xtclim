@@ -21,6 +21,18 @@ import xarray as xr
 from itwinai.components import DataGetter, monitor_exec
 
 
+def get_extrema(histo_dataset: np.ndarray) -> np.array:
+    """
+    Computes global extrema over past data.
+
+    Parameters:
+    histo_dataset: historical data
+    """
+    global_min = np.min(histo_dataset)
+    global_max = np.max(histo_dataset)
+    return np.array([global_min, global_max])
+
+
 class PreprocessData(DataGetter):
     def __init__(
         self,
@@ -187,17 +199,6 @@ class PreprocessData(DataGetter):
 
     @monitor_exec
     def execute(self):
-        def get_extrema(self, histo_dataset: np.ndarray) -> np.array:
-            """
-            Computes global extrema over past data.
-
-            Parameters:
-            histo_dataset: historical data
-            """
-            global_min = min(np.min(histo_dataset))
-            global_max = max(np.max(histo_dataset))
-            return np.array([global_min, global_max])
-
         # #### 1. Load Data to xarrays
 
         atmosfield = []
