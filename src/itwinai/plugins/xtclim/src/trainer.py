@@ -8,35 +8,32 @@ from codecarbon import EmissionsTracker
 # Instantiate the tracker object
 tracker = EmissionsTracker(
     output_dir="../code_carbon/",  # define the directory where to write the emissions results
-    output_file="emissions.csv",  # define the name of the file containing the emissions results
+    output_file="emissions.csv",  # define the name of the file containing the emissions
+    results
     # log_level='error' # comment out this line to see regular output
 )
 tracker.start()
 """
 
-import torch
-import torch.optim as optim
-import numpy as np
-import pandas as pd
+import configparser as cp
 import json
 
-from itwinai.components import Trainer, monitor_exec
-from itwinai.plugins.xtclim import model
+import numpy as np
+import pandas as pd
+import torch
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
-from itwinai.plugins.xtclim.engine import train, validate
-from itwinai.plugins.xtclim.utils import save_reconstructed_images, save_loss_plot, save_ex
-from itwinai.plugins.xtclim.initialization import device, beta, criterion
 
-import configparser as cp
+from itwinai.components import Trainer, monitor_exec
+from itwinai.plugins.xtclim.src import model
+from itwinai.plugins.xtclim.src.engine import train, validate
+from itwinai.plugins.xtclim.src.initialization import beta, criterion, device
+from itwinai.plugins.xtclim.src.utils import save_loss_plot
+
 
 class TorchTrainer(Trainer):
-    def __init__(
-            self,
-            epochs: int,
-            batch_size: int,
-            lr: float
-    ):
+    def __init__(self, epochs: int, batch_size: int, lr: float):
         super().__init__()
         self.epochs = epochs
         self.batch_size = batch_size
@@ -44,43 +41,40 @@ class TorchTrainer(Trainer):
 
     @monitor_exec
     def execute(self):
-        #### Configuration file
+        # ### Configuration file
         config = cp.ConfigParser()
-        config.read('xtclim.json')
+        config.read("xtclim.json")
 
         # pick the season to study among:
         # '' (none, i.e. full dataset), 'winter_', 'spring_', 'summer_', 'autumn_'
-        #seasons = ["winter_", "spring_", "summer_", "autumn_"]
-        seasons = json.loads(config.get('GENERAL', 'seasons'))
+        # seasons = ["winter_", "spring_", "summer_", "autumn_"]
+        seasons = json.loads(config.get("GENERAL", "seasons"))
 
         # number of members used for the training of the network
-        n_memb = config.getint('TRAIN', 'n_memb')
+        n_memb = config.getint("TRAIN", "n_memb")
 
         # initialize learning parameters
-        #lr0 = 0.001
-        #batch_size = 64
-        #epochs = 100
-        #early stopping parameters
-        stop_delta = config.getfloat('TRAIN', 'stop_delta')
-        #stop_delta = 0.01  # under 1% improvement consider the model starts converging
-        patience = config.getint('TRAIN', 'patience')
-        #patience = 15  # wait for a few epochs to be sure before actually stopping
-        early_count = config.getint('TRAIN', 'early_count')
-        #early_count = 0  # count when validation loss < stop_delta
-        old_valid_loss = config.getfloat('TRAIN', 'old_valid_loss')
-        #old_valid_loss = 0  # keep track of validation loss at t-1
+        # lr0 = 0.001
+        # batch_size = 64
+        # epochs = 100
+        # early stopping parameters
+        stop_delta = config.getfloat("TRAIN", "stop_delta")
+        # stop_delta = 0.01  # under 1% improvement consider the model starts converging
+        patience = config.getint("TRAIN", "patience")
+        # patience = 15  # wait for a few epochs to be sure before actually stopping
+        early_count = config.getint("TRAIN", "early_count")
+        # early_count = 0  # count when validation loss < stop_delta
+        old_valid_loss = config.getfloat("TRAIN", "old_valid_loss")
+        # old_valid_loss = 0  # keep track of validation loss at t-1
 
         for season in seasons:
-
             # initialize the model
             cvae_model = model.ConvVAE().to(device)
             optimizer = optim.Adam(cvae_model.parameters(), lr=self.lr)
 
             # load training set and train data
             train_time = pd.read_csv(f"input/dates_train_{season}_data_{n_memb}memb.csv")
-            train_data = np.load(
-                f"input/preprocessed_1d_train_{season}_data_{n_memb}memb.npy"
-            )
+            train_data = np.load(f"input/preprocessed_1d_train_{season}_data_{n_memb}memb.npy")
             n_train = len(train_data)
             trainset = [
                 (torch.from_numpy(np.reshape(train_data[i], (2, 32, 32))), train_time["0"][i])
@@ -104,11 +98,11 @@ class TorchTrainer(Trainer):
             # a list to save the loss evolutions
             train_loss = []
             valid_loss = []
-            min_valid_epoch_loss = config.getint('TRAIN', 'min_valid_epoch_loss')
-            #min_valid_epoch_loss = 100  # random high value
+            min_valid_epoch_loss = config.getint("TRAIN", "min_valid_epoch_loss")
+            # min_valid_epoch_loss = 100  # random high value
 
             for epoch in range(self.epochs):
-                print(f"Epoch {epoch+1} of {self.epochs}")
+                print(f"Epoch {epoch + 1} of {self.epochs}")
 
                 # train the model
                 train_epoch_loss = train(
@@ -125,42 +119,41 @@ class TorchTrainer(Trainer):
                 valid_loss.append(valid_epoch_loss)
 
         # save the reconstructed images from the validation loop
-        #save_reconstructed_images(recon_images, epoch+1, season)
+        # save_reconstructed_images(recon_images, epoch+1, season)
 
         # convert the reconstructed images to PyTorch image grid format
         image_grid = make_grid(recon_images.detach().cpu())
         grid_images.append(image_grid)
         # save one example of reconstructed image before and after training
 
-        #if epoch == 0 or epoch == self.epochs-1:
+        # if epoch == 0 or epoch == self.epochs-1:
         #    save_ex(recon_images[0], epoch, season)
 
         # decreasing learning rate
         if (epoch + 1) % 20 == 0:
             lr = lr / 5
 
-#-------
-
+        # -------
 
         # early stopping to avoid overfitting
-#        if (
-#            epoch > 1
-#            and (old_valid_loss - valid_epoch_loss) / old_valid_loss < stop_delta
-#        ):
-            # if the marginal improvement in validation loss is too small
-#            early_count += 1
+        #        if (
+        #            epoch > 1
+        #            and (old_valid_loss - valid_epoch_loss) / old_valid_loss < stop_delta
+        #        ):
+        # if the marginal improvement in validation loss is too small
+        #            early_count += 1
 
-        #if early_count > patience:
-                # if too small improvement for a few epochs in a row, stop learning
+        # if early_count > patience:
+        # if too small improvement for a few epochs in a row, stop learning
         #        save_ex(recon_images[0], epoch, season)
-                #break
+        # break
 
-#        else:
-            # if the condition is not verified anymore, reset the count
-#            early_count = 0
-#        old_valid_loss = valid_epoch_loss
+        #        else:
+        # if the condition is not verified anymore, reset the count
+        #            early_count = 0
+        #        old_valid_loss = valid_epoch_loss
 
-#---------------
+        # ---------------
 
         # save best model
         if valid_epoch_loss < min_valid_epoch_loss:

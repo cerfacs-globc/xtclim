@@ -1,23 +1,22 @@
-import torch
-import numpy as np
-import pandas as pd
+import configparser as cp
 import json
 from operator import add
 
-from itwinai.plugins.xtclim import model
+import numpy as np
+import pandas as pd
+import torch
 from torch.utils.data import DataLoader
-from itwinai.plugins.xtclim.engine import evaluate
-from itwinai.plugins.xtclim.initialization import (
-    device,
-    beta,
+
+from itwinai.plugins.xtclim.src import model
+from itwinai.plugins.xtclim.src.engine import evaluate
+from itwinai.plugins.xtclim.src.initialization import (
     criterion,
+    device,
     n_avg,
     pixel_wise_criterion,
 )
 
-import configparser as cp
-
-#### Configuration file
+# Configuration file
 config = cp.ConfigParser()
 config.read("xtclim.json")
 
@@ -88,12 +87,8 @@ if past_evaluation:
         train_avg_losses = train_avg_losses / n_avg
         test_avg_losses = test_avg_losses / n_avg
 
-        pd.DataFrame(tot_train_losses).to_csv(
-            f"./outputs/train_losses_{season}_1d_allssp.csv"
-        )
-        pd.DataFrame(tot_test_losses).to_csv(
-            f"./outputs/test_losses_{season}_1d_allssp.csv"
-        )
+        pd.DataFrame(tot_train_losses).to_csv(f"./outputs/train_losses_{season}_1d_allssp.csv")
+        pd.DataFrame(tot_test_losses).to_csv(f"./outputs/test_losses_{season}_1d_allssp.csv")
         print("Train average loss:", train_avg_losses)
         print("Test average loss:", test_avg_losses)
 

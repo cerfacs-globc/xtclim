@@ -11,26 +11,26 @@
 
 # #### 0. Libraries
 
-import numpy as np
-import xarray as xr
-import cftime
-import pandas as pd
 import configparser as cp
 import json
 
+import cftime
+import numpy as np
+import pandas as pd
+import xarray as xr
+
 from itwinai.components import DataGetter, monitor_exec
 
+
 class PreprocessData(DataGetter):
-    def __init__(
-            self,
-            scenario: str,
-            dataset_root: str
-    ):
+    def __init__(self, scenario: str, dataset_root: str):
         super().__init__()
         self.scenario = scenario
         self.dataset_root = dataset_root
 
-    def xr_to_ndarray(self, xr_dset: xr.Dataset, sq_coords: dict) -> (np.ndarray, np.array, str):
+    def xr_to_ndarray(
+        self, xr_dset: xr.Dataset, sq_coords: dict
+    ) -> (np.ndarray, np.array, str):
         """
         Converts an xarray dataset it to a cropped square ndarray,
         after ajusting the longitudes from [0,360] to [-180,180].
@@ -102,7 +102,7 @@ class PreprocessData(DataGetter):
         norm_dset = (nd_dset - extrema[0]) / (extrema[1] - extrema[0])
         return norm_dset
 
-    ##### 4. Split Historical Data into Train and Test Datasets
+    # #### 4. Split Historical Data into Train and Test Datasets
     # Train the network on most of the historical data,
     # but keep some to test the model performance on new data points.
     def split_train_test(
@@ -144,7 +144,7 @@ class PreprocessData(DataGetter):
         test_time = time_list[split_index:]
         return train_data, test_data, train_time, test_time
 
-    ##### 5. Combine into a 2D-Array
+    # #### 5. Combine into a 2D-Array
     def ndarray_to_2d(self, atmosfield_dset: np.ndarray, land_prop: np.ndarray) -> np.ndarray:
         """
         Combines climate variable and land-sea mask data sets.
@@ -168,11 +168,10 @@ class PreprocessData(DataGetter):
 
     @monitor_exec
     def execute(self):
-
         def get_extrema(self, histo_dataset: np.ndarray) -> np.array:
             """
             Computes global extrema over past data.
-            
+
             Parameters:
             histo_dataset: historical data
             """
@@ -180,21 +179,21 @@ class PreprocessData(DataGetter):
             global_max = max(np.max(histo_dataset))
             return np.array([global_min, global_max])
 
-        #### Configuration file
+        # #### Configuration file
         config = cp.ConfigParser()
-        config.read('xtclim.json')
-        
-        #### 1. Load Data to xarrays
-        data_dir = config.get('GENERAL','datadir')
+        config.read("xtclim.json")
 
-        datasets_histo = json.loads(config.get('GENERAL','histo_extr'))
+        # #### 1. Load Data to xarrays
+        data_dir = config.get("GENERAL", "datadir")
+
+        datasets_histo = json.loads(config.get("GENERAL", "histo_extr"))
 
         atmosfield = []
         for f in datasets_histo:
             print(f)
             # Historical Datasets
             # regrouped by climate variable
-            atmosfield.append(xr.open_dataset(data_dir+'/'+f))
+            atmosfield.append(xr.open_dataset(data_dir + "/" + f))
 
         atmosfield_histo = xr.concat(atmosfield, "time")
 
@@ -203,18 +202,25 @@ class PreprocessData(DataGetter):
             f"{data_dir}/sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
             chunks={"time": 10},
         )
-            
-        ##### 2. Restrict to a Geospatial Square
-        min_lon = config.getfloat('GENERAL', 'min_lon')
-        max_lon = config.getfloat('GENERAL', 'max_lon')
-        min_lat = config.getfloat('GENERAL', 'min_lat')
-        max_lat = config.getfloat('GENERAL', 'max_lat')
-        sq32_world_region = {"min_lon": min_lon, "max_lon": max_lon, "min_lat": min_lat, "max_lat": max_lat}
-        
+
+        # #### 2. Restrict to a Geospatial Square
+        min_lon = config.getfloat("GENERAL", "min_lon")
+        max_lon = config.getfloat("GENERAL", "max_lon")
+        min_lat = config.getfloat("GENERAL", "min_lat")
+        max_lat = config.getfloat("GENERAL", "max_lat")
+        sq32_world_region = {
+            "min_lon": min_lon,
+            "max_lon": max_lon,
+            "min_lat": min_lat,
+            "max_lat": max_lat,
+        }
+
         land_prop, lat_list, lon_list = self.sftlf_to_ndarray(sftlf, sq32_world_region)
-            
+
         # Crop original data to chosen region
-        atmosfield_histo_nd, time_list = self.xr_to_ndarray(atmosfield_histo, sq32_world_region)
+        atmosfield_histo_nd, time_list = self.xr_to_ndarray(
+            atmosfield_histo, sq32_world_region
+        )
 
         # Compute the variable extrema over history
         atmosfield_extrema = get_extrema(atmosfield_histo_nd)
@@ -226,7 +232,7 @@ class PreprocessData(DataGetter):
         train_atmosfield, test_atmosfield, train_time, test_time = self.split_train_test(
             atmosfield_histo_norm, time_list
         )
-            
+
         # Add up split data and land-sea mask
         total_train = self.ndarray_to_2d(train_atmosfield, land_prop)
         total_test = self.ndarray_to_2d(test_atmosfield, land_prop)
@@ -236,31 +242,32 @@ class PreprocessData(DataGetter):
         np.save("input/preprocessed_2d_test_data_allssp.npy", total_test)
         pd.DataFrame(train_time).to_csv("input/dates_train_data.csv")
         pd.DataFrame(test_time).to_csv("input/dates_test_data.csv")
-            
+
         # Projection Datasets
         # regrouped by climate variable
         # IPCC scenarios: SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5
         # choose among "126", "245", "370", "585"
         # scenario = self.scenario
-        scenarios = json.loads(config.getint('GENERAL', 'scenarios'))
-        
-        for scenario in scenarios:
+        scenarios = json.loads(config.getint("GENERAL", "scenarios"))
 
-            datasets_histo = config.get('GENERAL','scenario_extr_'+scenario)
+        for scenario in scenarios:
+            datasets_histo = config.get("GENERAL", "scenario_extr_" + scenario)
 
             atmosfield = []
             for f in datasets_proj:
                 # SSP Datasets
                 # regrouped by climate variable
-                atmosfield.append(xr.open_dataset(data_dir+'/'+f))
-                
+                atmosfield.append(xr.open_dataset(data_dir + "/" + f))
+
             atmosfield_proj = xr.concat(atmosfield, "time")
-            
-            ##### 6. Step-by-Step Preprocessing
-            
+
+            # #### 6. Step-by-Step Preprocessing
+
             # Crop original data to chosen region
-            atmosfield_proj_nd, time_proj = self.xr_to_ndarray(atmosfield_proj, sq32_world_region)
-            
+            atmosfield_proj_nd, time_proj = self.xr_to_ndarray(
+                atmosfield_proj, sq32_world_region
+            )
+
             # Here are the results for CMCC-ESM2 (all scenarios)
             # to save time
             # atmosfield_extrema = np.array([234.8754, 327.64])
@@ -268,15 +275,15 @@ class PreprocessData(DataGetter):
             # ssp370 array([234.8754 , 325.43323], dtype=float32)
             # ssp245 array([234.8754, 324.8263], dtype=float32)
             # ssp126 array([234.8754, 323.6651], dtype=float32)
-            
+
             # Normalize data with the above extrema
             atmosfield_proj_norm = self.normalize(atmosfield_proj_nd, atmosfield_extrema)
-            
+
             # Add up land-sea mask
             total_proj = self.ndarray_to_2d(atmosfield_proj_norm, land_prop)
-            
-            ##### 7. Save Results
-            
+
+            # #### 7. Save Results
+
             # Save projection data for one scenario
             np.save(f"input/preprocessed_2d_proj{scenario}_data_allssp.npy", total_proj)
             pd.DataFrame(time_proj).to_csv("input/dates_proj{scenario}_data.csv")

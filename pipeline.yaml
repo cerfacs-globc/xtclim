@@ -12,17 +12,17 @@ pipeline:
    init_args:
      steps:
          preprocessing-step:
-           class_path: itwinai.plugins.xtclim.preprocess_functions_2d_ssp.PreprocessData
+           class_path: itwinai.plugins.xtclim.preprocessing.preprocess_functions_2d_ssp.PreprocessData
            init_args:
                dataset_root: ${dataset_root}
                scenario: ${scenario}
          preprocessing-split-step:
-           class_path: itwinai.plugins.xtclim.preprocess_2d_seasons.SplitPreprocessedData
+           class_path: itwinai.plugins.xtclim.preprocessing.preprocess_2d_seasons.SplitPreprocessedData
            init_args:
                scenario: ${scenario} 
          training-step:
              #class_path: src.trainer_dist.XTClimTrainer
-           class_path: itwinai.plugins.xtclim.trainer.TorchTrainer
+           class_path: itwinai.plugins.xtclim.src.trainer.TorchTrainer
            init_args:
                epochs: ${epochs}
                batch_size: ${batch_size}

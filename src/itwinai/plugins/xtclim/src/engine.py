@@ -1,7 +1,7 @@
-from tqdm import tqdm
 import torch
+from tqdm import tqdm
 
-from itwinai.plugins.xtclim.initialization import pixel_wise_criterion
+from itwinai.plugins.xtclim.src.initialization import pixel_wise_criterion
 
 
 def final_loss(bce_loss, mu, logvar, beta=0.1):

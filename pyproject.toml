@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "itwinai-xtclim-plugin"
 version = "0.1.0"
+requires-python = ">=3.10"
 description = "xtclim plugin for itwinai"
 authors = [{ name = "Christian Page", email = "christian.page@cerfacs.fr" }]
 dependencies = [
@@ -26,12 +27,33 @@ dependencies = [
     "xarray",
     "netCDF4",
     "h5netcdf",
+    "ruff>=0.9.6",
 ]
 
 [tool.setuptools.packages.find]
 # Declare this package as part of the `itwinai.plugins` namespace
 where = ["src"]
-include = ["itwinai.plugins.xtclim"]
+# Add plugin subfolders explicitly here
+include = [
+    "itwinai.plugins.xtclim",
+    "itwinai.plugins.xtclim.src",
+    "itwinai.plugins.xtclim.preprocessing",
+]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.ipynb"]
+
+# Ruff configuration: https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+line-length = 95
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E203"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
