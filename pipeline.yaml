@@ -1,10 +1,5 @@
 # General configuration
-dataset_root: '/Users/page/Documents/projets/interTwin/xtclim_env/data/'
-epochs: 3
-batch_size: 10
-lr: 0.001
-scenario: '245'
-strategy: 'ddp'
+config_path: '/Users/page/Documents/projets/interTwin/xtclim_env/xtclim.json'
 
 # Workflows
 pipeline:
@@ -14,18 +9,13 @@ pipeline:
          preprocessing-step:
            class_path: itwinai.plugins.xtclim.preprocessing.preprocess_functions_2d_ssp.PreprocessData
            init_args:
-               dataset_root: ${dataset_root}
-               scenario: ${scenario}
+               config_path: ${config_path}
          preprocessing-split-step:
            class_path: itwinai.plugins.xtclim.preprocessing.preprocess_2d_seasons.SplitPreprocessedData
            init_args:
-               scenario: ${scenario} 
+               config_path: ${config_path}
          training-step:
              #class_path: src.trainer_dist.XTClimTrainer
            class_path: itwinai.plugins.xtclim.src.trainer.TorchTrainer
            init_args:
-               epochs: ${epochs}
-               batch_size: ${batch_size}
-               lr: ${lr}
-               #strategy: ${strategy}
-        
+               config_path: ${config_path}

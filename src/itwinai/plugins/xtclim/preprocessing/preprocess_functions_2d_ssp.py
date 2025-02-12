@@ -23,10 +23,17 @@ from itwinai.components import DataGetter, monitor_exec
 
 
 class PreprocessData(DataGetter):
-    def __init__(self, scenario: str, dataset_root: str):
+    def __init__(self, config_path: str = "./xtclim.json"):
         super().__init__()
-        self.scenario = scenario
-        self.dataset_root = dataset_root
+        self.config_path = config_path
+
+        # #### Configuration file
+        self.config = cp.ConfigParser()
+        self.config.read(self.config_path)
+
+        self.dataset_root = config.get("GENERAL", "dataset_root")
+        self.input_path = config.get("GENERAL", "input_path")
+        self.output_path = config.get("GENERAL", "output_path")
 
     def xr_to_ndarray(
         self, xr_dset: xr.Dataset, sq_coords: dict
@@ -179,35 +186,31 @@ class PreprocessData(DataGetter):
             global_max = max(np.max(histo_dataset))
             return np.array([global_min, global_max])
 
-        # #### Configuration file
-        config = cp.ConfigParser()
-        config.read("xtclim.json")
-
         # #### 1. Load Data to xarrays
-        data_dir = config.get("GENERAL", "datadir")
+        dataset_root = self.config.get("GENERAL", "dataset_root")
 
-        datasets_histo = json.loads(config.get("GENERAL", "histo_extr"))
+        datasets_histo = json.loads(self.config.get("GENERAL", "histo_extr"))
 
         atmosfield = []
         for f in datasets_histo:
             print(f)
             # Historical Datasets
             # regrouped by climate variable
-            atmosfield.append(xr.open_dataset(data_dir + "/" + f))
+            atmosfield.append(xr.open_dataset(dataset_root + "/" + f))
 
         atmosfield_histo = xr.concat(atmosfield, "time")
 
         # Load land-sea mask data
         sftlf = xr.open_dataset(
-            f"{data_dir}/sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
+            f"{dataset_root}/sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
             chunks={"time": 10},
         )
 
         # #### 2. Restrict to a Geospatial Square
-        min_lon = config.getfloat("GENERAL", "min_lon")
-        max_lon = config.getfloat("GENERAL", "max_lon")
-        min_lat = config.getfloat("GENERAL", "min_lat")
-        max_lat = config.getfloat("GENERAL", "max_lat")
+        min_lon = self.config.getfloat("GENERAL", "min_lon")
+        max_lon = self.config.getfloat("GENERAL", "max_lon")
+        min_lat = self.config.getfloat("GENERAL", "min_lat")
+        max_lat = self.config.getfloat("GENERAL", "max_lat")
         sq32_world_region = {
             "min_lon": min_lon,
             "max_lon": max_lon,
@@ -238,26 +241,26 @@ class PreprocessData(DataGetter):
         total_test = self.ndarray_to_2d(test_atmosfield, land_prop)
 
         # Save train and test data sets
-        np.save("input/preprocessed_2d_train_data_allssp.npy", total_train)
-        np.save("input/preprocessed_2d_test_data_allssp.npy", total_test)
-        pd.DataFrame(train_time).to_csv("input/dates_train_data.csv")
-        pd.DataFrame(test_time).to_csv("input/dates_test_data.csv")
+        np.save(self.input_path+"/preprocessed_2d_train_data_allssp.npy", total_train)
+        np.save(self.input_path+"/preprocessed_2d_test_data_allssp.npy", total_test)
+        pd.DataFrame(train_time).to_csv(self.input_path+"/dates_train_data.csv")
+        pd.DataFrame(test_time).to_csv(self.input_path+"/dates_test_data.csv")
 
         # Projection Datasets
         # regrouped by climate variable
         # IPCC scenarios: SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5
         # choose among "126", "245", "370", "585"
         # scenario = self.scenario
-        scenarios = json.loads(config.getint("GENERAL", "scenarios"))
+        scenarios = json.loads(self.config.getint("GENERAL", "scenarios"))
 
         for scenario in scenarios:
-            datasets_histo = config.get("GENERAL", "scenario_extr_" + scenario)
+            datasets_histo = self.config.get("GENERAL", "scenario_extr_" + scenario)
 
             atmosfield = []
             for f in datasets_proj:
                 # SSP Datasets
                 # regrouped by climate variable
-                atmosfield.append(xr.open_dataset(data_dir + "/" + f))
+                atmosfield.append(xr.open_dataset(dataset_root + "/" + f))
 
             atmosfield_proj = xr.concat(atmosfield, "time")
 
@@ -285,5 +288,5 @@ class PreprocessData(DataGetter):
             # #### 7. Save Results
 
             # Save projection data for one scenario
-            np.save(f"input/preprocessed_2d_proj{scenario}_data_allssp.npy", total_proj)
-            pd.DataFrame(time_proj).to_csv("input/dates_proj{scenario}_data.csv")
+            np.save(self.input_path+f"/preprocessed_2d_proj{scenario}_data_allssp.npy", total_proj)
+            pd.DataFrame(time_proj).to_csv(self.input_path+"/dates_proj{scenario}_data.csv")

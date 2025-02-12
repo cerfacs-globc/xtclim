@@ -4,19 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# Configuration file
-config = cp.ConfigParser()
-config.read("xtclim.json")
-
-kernel_size = config.getint("MODEL", "kernel_size")
-# kernel_size = 4 # (4, 4) kernel
-init_channels = config.getint("MODEL", "init_channels")
-# init_channels = 8 # initial number of filters
-image_channels = config.getint("MODEL", "image_channels")
-# image_channels = 2 # 1 channel/variable: max temperature, precipitation, wind
-latent_dim = config.getint("MODEL", "latent_dim")
-# latent_dim = 128 # latent space dimension (in which the image is compressed)
-
 
 # define a Conv VAE
 class ConvVAE(nn.Module):
@@ -27,9 +14,24 @@ class ConvVAE(nn.Module):
     - decoder with 4 deconvolutional layers (ReLUs, ending with a sigmoid)
     """
 
-    def __init__(self):
+    def __init__(self, config_path: str = "./xtclim.json"):
         super(ConvVAE, self).__init__()
 
+        self.config_path = config_path
+        
+        # Configuration file
+        config = cp.ConfigParser()
+        config.read(self.config_path))
+        
+        kernel_size = config.getint("MODEL", "kernel_size")
+        # kernel_size = 4 # (4, 4) kernel
+        init_channels = config.getint("MODEL", "init_channels")
+        # init_channels = 8 # initial number of filters
+        image_channels = config.getint("MODEL", "image_channels")
+        # image_channels = 2 # 1 channel/variable: max temperature, precipitation, wind
+        latent_dim = config.getint("MODEL", "latent_dim")
+        # latent_dim = 128 # latent space dimension (in which the image is compressed)
+        
         # encoder
         self.enc1 = nn.Conv2d(
             in_channels=image_channels,

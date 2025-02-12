@@ -1,9 +1,6 @@
 import torch
 from tqdm import tqdm
 
-from itwinai.plugins.xtclim.src.initialization import pixel_wise_criterion
-
-
 def final_loss(bce_loss, mu, logvar, beta=0.1):
     """
     Adds up reconstruction loss (BCELoss) and Kullback-Leibler divergence.
@@ -95,7 +92,7 @@ def evaluate(
     dataset,
     device,
     criterion,
-    pixel_wise_criterion=pixel_wise_criterion,
+    pixel_wise_criterion,
 ):
     """
     Evaluates the CVAE network and returns the reconstruction loss

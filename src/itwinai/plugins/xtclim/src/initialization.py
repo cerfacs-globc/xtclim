@@ -3,23 +3,18 @@ import configparser as cp
 import torch
 import torch.nn as nn
 
-# Configuration file
-config = cp.ConfigParser()
-config.read("xtclim.json")
+def initialization(config_path: str = "./xtclim.json"):
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# Mean-Squared Error as the average difference between the pixels
-# in the original image vs. the reconstructed one
-criterion = nn.MSELoss()
-# pixel-wise MSE loss
-pixel_wise_criterion = nn.MSELoss(reduction="none")
-
-# KL divergence handles dispersion of information in latent space
-# a balance is to be found with the prevailing reconstruction error
-beta = config.getfloat("MODEL", "beta")
-# beta = 0.1
-
-# number of evaluations for each dataset
-n_avg = config.getint("MODEL", "n_avg")
-# n_avg = 20
+    # Configuration file
+    config = cp.ConfigParser()
+    config.read(config_path)
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Mean-Squared Error as the average difference between the pixels
+    # in the original image vs. the reconstructed one
+    criterion = nn.MSELoss()
+    # pixel-wise MSE loss
+    pixel_wise_criterion = nn.MSELoss(reduction="none")
+    
+    return device, criterion, pixel_wise_criterion

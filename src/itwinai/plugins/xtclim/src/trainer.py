@@ -28,43 +28,59 @@ from torchvision.utils import make_grid
 from itwinai.components import Trainer, monitor_exec
 from itwinai.plugins.xtclim.src import model
 from itwinai.plugins.xtclim.src.engine import train, validate
-from itwinai.plugins.xtclim.src.initialization import beta, criterion, device
+from itwinai.plugins.xtclim.src.initialization import initialization
 from itwinai.plugins.xtclim.src.utils import save_loss_plot
 
 
 class TorchTrainer(Trainer):
-    def __init__(self, epochs: int, batch_size: int, lr: float):
+    def __init__(self, config_path: str = "./xtclim.json"):
         super().__init__()
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.lr = lr
+        self.config_path = config_path
+
+        # ### Configuration file
+        self.config = cp.ConfigParser()
+        self.config.read(self.config_path)
+
+        self.epochs = self.config.getint("MODEL", "epochs")
+        self.batch_size = self.config.getint("MODEL", "batch_size")
+        self.lr = self.config.getfloat("MODEL", "lr")
+        self.input_path = json.loads(self.config.get("GENERAL", "input_path"))
+        self.output_path = json.loads(self.config.get("GENERAL", "output_path"))
 
     @monitor_exec
     def execute(self):
-        # ### Configuration file
-        config = cp.ConfigParser()
-        config.read("xtclim.json")
+
+        # KL divergence handles dispersion of information in latent space
+        # a balance is to be found with the prevailing reconstruction error
+        beta = self.config.getfloat("MODEL", "beta")
+        # beta = 0.1
+        
+        # number of evaluations for each dataset
+        n_avg = self.config.getint("MODEL", "n_avg")
+        # n_avg = 20
+
+        device, criterion, pixel_wise_criterion = initialization(self.config_path)
 
         # pick the season to study among:
         # '' (none, i.e. full dataset), 'winter_', 'spring_', 'summer_', 'autumn_'
         # seasons = ["winter_", "spring_", "summer_", "autumn_"]
-        seasons = json.loads(config.get("GENERAL", "seasons"))
+        seasons = json.loads(self.config.get("GENERAL", "seasons"))
 
         # number of members used for the training of the network
-        n_memb = config.getint("TRAIN", "n_memb")
+        n_memb = self.config.getint("TRAIN", "n_memb")
 
         # initialize learning parameters
         # lr0 = 0.001
         # batch_size = 64
         # epochs = 100
         # early stopping parameters
-        stop_delta = config.getfloat("TRAIN", "stop_delta")
+        stop_delta = self.config.getfloat("TRAIN", "stop_delta")
         # stop_delta = 0.01  # under 1% improvement consider the model starts converging
-        patience = config.getint("TRAIN", "patience")
+        patience = self.config.getint("TRAIN", "patience")
         # patience = 15  # wait for a few epochs to be sure before actually stopping
-        early_count = config.getint("TRAIN", "early_count")
+        early_count = self.config.getint("TRAIN", "early_count")
         # early_count = 0  # count when validation loss < stop_delta
-        old_valid_loss = config.getfloat("TRAIN", "old_valid_loss")
+        old_valid_loss = self.config.getfloat("TRAIN", "old_valid_loss")
         # old_valid_loss = 0  # keep track of validation loss at t-1
 
         for season in seasons:
@@ -73,8 +89,8 @@ class TorchTrainer(Trainer):
             optimizer = optim.Adam(cvae_model.parameters(), lr=self.lr)
 
             # load training set and train data
-            train_time = pd.read_csv(f"input/dates_train_{season}_data_{n_memb}memb.csv")
-            train_data = np.load(f"input/preprocessed_1d_train_{season}_data_{n_memb}memb.npy")
+            train_time = pd.read_csv(self.input_path+f"/dates_train_{season}_data_{n_memb}memb.csv")
+            train_data = np.load(self.input_path+f"/preprocessed_1d_train_{season}_data_{n_memb}memb.npy")
             n_train = len(train_data)
             trainset = [
                 (torch.from_numpy(np.reshape(train_data[i], (2, 32, 32))), train_time["0"][i])
@@ -84,8 +100,8 @@ class TorchTrainer(Trainer):
             trainloader = DataLoader(trainset, batch_size=self.batch_size, shuffle=True)
 
             # load validation set and validation data
-            test_time = pd.read_csv(f"input/dates_test_{season}_data_{n_memb}memb.csv")
-            test_data = np.load(f"input/preprocessed_1d_test_{season}_data_{n_memb}memb.npy")
+            test_time = pd.read_csv(self.input_path+f"/dates_test_{season}_data_{n_memb}memb.csv")
+            test_data = np.load(self.input_path+f"/preprocessed_1d_test_{season}_data_{n_memb}memb.npy")
             n_test = len(test_data)
             testset = [
                 (torch.from_numpy(np.reshape(test_data[i], (2, 32, 32))), test_time["0"][i])
@@ -98,7 +114,7 @@ class TorchTrainer(Trainer):
             # a list to save the loss evolutions
             train_loss = []
             valid_loss = []
-            min_valid_epoch_loss = config.getint("TRAIN", "min_valid_epoch_loss")
+            min_valid_epoch_loss = self.config.getint("TRAIN", "min_valid_epoch_loss")
             # min_valid_epoch_loss = 100  # random high value
 
             for epoch in range(self.epochs):
@@ -119,7 +135,7 @@ class TorchTrainer(Trainer):
                 valid_loss.append(valid_epoch_loss)
 
         # save the reconstructed images from the validation loop
-        # save_reconstructed_images(recon_images, epoch+1, season)
+        # save_reconstructed_images(recon_images, epoch+1, season, self.output_path)
 
         # convert the reconstructed images to PyTorch image grid format
         image_grid = make_grid(recon_images.detach().cpu())
@@ -127,7 +143,7 @@ class TorchTrainer(Trainer):
         # save one example of reconstructed image before and after training
 
         # if epoch == 0 or epoch == self.epochs-1:
-        #    save_ex(recon_images[0], epoch, season)
+        #    save_ex(recon_images[0], epoch, season, self.output_path)
 
         # decreasing learning rate
         if (epoch + 1) % 20 == 0:
@@ -145,7 +161,7 @@ class TorchTrainer(Trainer):
 
         # if early_count > patience:
         # if too small improvement for a few epochs in a row, stop learning
-        #        save_ex(recon_images[0], epoch, season)
+        #        save_ex(recon_images[0], epoch, season, self.output_path)
         # break
 
         #        else:
@@ -160,19 +176,19 @@ class TorchTrainer(Trainer):
             min_valid_epoch_loss = valid_epoch_loss
             torch.save(
                 cvae_model.state_dict(),
-                f"outputs/cvae_model_{season}_1d_{n_memb}memb.pth",
+                self.output_path+f"/cvae_model_{season}_1d_{n_memb}memb.pth",
             )
 
             print(f"Train Loss: {train_epoch_loss:.4f}")
             print(f"Val Loss: {valid_epoch_loss:.4f}")
 
-            save_loss_plot(train_loss, valid_loss, season)
+            save_loss_plot(train_loss, valid_loss, season, self.output_path)
             # save the loss evolutions
             pd.DataFrame(train_loss).to_csv(
-                f"outputs/train_loss_indiv_{season}_1d_{n_memb}memb.csv"
+                self.output_path+f"/train_loss_indiv_{season}_1d_{n_memb}memb.csv"
             )
             pd.DataFrame(valid_loss).to_csv(
-                f"outputs/test_loss_indiv_{season}_1d_{n_memb}memb.csv"
+                self.output_path+f"/test_loss_indiv_{season}_1d_{n_memb}memb.csv"
             )
 
         # emissions = tracker.stop()

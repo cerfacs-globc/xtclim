@@ -8,7 +8,13 @@ seasons = ["winter", "spring", "summer", "autumn"]
 scenarios = ['245']
 
 ; Data directory
-datadir = ./data
+dataset_root = /Users/page/Documents/projets/interTwin/xtclim_env/data
+
+; input_path
+input_path = /Users/page/Documents/projets/interTwin/xtclim_env/input
+
+; output_path
+output_path = /Users/page/Documents/projets/interTwin/xtclim_env/outputs
 
 ; Variable
 var_extr = tasmax
@@ -37,9 +43,12 @@ max_lat = 66
 n_memb = 1
 
 ; initialize learning parameters
-; lr0 = 0.001
-; batch_size = 64
-; epochs = 100
+lr0 = 0.001
+batch_size = 10
+;batch_size = 64
+epochs = 3
+;epochs = 100
+strategy = ddp
 ; early stopping parameters
 ; under 1% improvement consider the model starts converging
 stop_delta = 0.01
