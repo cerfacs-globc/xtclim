@@ -11,8 +11,7 @@
 
 # #### 0. Libraries
 
-import configparser as cp
-import json
+from typing import Dict, List
 
 import cftime
 import numpy as np
@@ -23,17 +22,30 @@ from itwinai.components import DataGetter, monitor_exec
 
 
 class PreprocessData(DataGetter):
-    def __init__(self, config_path: str = "./xtclim.json"):
+    def __init__(
+        self,
+        dataset_root: str,
+        input_path: str,
+        output_path: str,
+        histo_extr: List[str],
+        min_lon: float,
+        max_lon: float,
+        min_lat: float,
+        max_lat: float,
+        scenarios: List[int],
+        scenario_extr: Dict[int, List[str]],
+    ):
         super().__init__()
-        self.config_path = config_path
-
-        # #### Configuration file
-        self.config = cp.ConfigParser()
-        self.config.read(self.config_path)
-
-        self.dataset_root = self.config.get("GENERAL", "dataset_root")
-        self.input_path = self.config.get("GENERAL", "input_path")
-        self.output_path = self.config.get("GENERAL", "output_path")
+        self.dataset_root = dataset_root
+        self.input_path = input_path
+        self.output_path = output_path
+        self.histo_extr = histo_extr
+        self.min_lon = min_lon
+        self.max_lon = max_lon
+        self.min_lat = min_lat
+        self.max_lat = max_lat
+        self.scenarios = scenarios
+        self.scenario_extr = scenario_extr
 
     def xr_to_ndarray(
         self, xr_dset: xr.Dataset, sq_coords: dict
@@ -187,35 +199,28 @@ class PreprocessData(DataGetter):
             return np.array([global_min, global_max])
 
         # #### 1. Load Data to xarrays
-        dataset_root = self.config.get("GENERAL", "dataset_root")
-
-        datasets_histo = json.loads(self.config.get("GENERAL", "histo_extr"))
 
         atmosfield = []
-        for f in datasets_histo:
+        for f in self.histo_extr:
             print(f)
             # Historical Datasets
             # regrouped by climate variable
-            atmosfield.append(xr.open_dataset(dataset_root + "/" + f))
+            atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f))
 
         atmosfield_histo = xr.concat(atmosfield, "time")
 
         # Load land-sea mask data
         sftlf = xr.open_dataset(
-            f"{dataset_root}/sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
+            f"{self.dataset_root}/sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc",
             chunks={"time": 10},
         )
 
         # #### 2. Restrict to a Geospatial Square
-        min_lon = self.config.getfloat("GENERAL", "min_lon")
-        max_lon = self.config.getfloat("GENERAL", "max_lon")
-        min_lat = self.config.getfloat("GENERAL", "min_lat")
-        max_lat = self.config.getfloat("GENERAL", "max_lat")
         sq32_world_region = {
-            "min_lon": min_lon,
-            "max_lon": max_lon,
-            "min_lat": min_lat,
-            "max_lat": max_lat,
+            "min_lon": self.min_lon,
+            "max_lon": self.max_lon,
+            "min_lat": self.min_lat,
+            "max_lat": self.max_lat,
         }
 
         land_prop, lat_list, lon_list = self.sftlf_to_ndarray(sftlf, sq32_world_region)
@@ -251,16 +256,16 @@ class PreprocessData(DataGetter):
         # IPCC scenarios: SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5
         # choose among "126", "245", "370", "585"
         # scenario = self.scenario
-        scenarios = json.loads(self.config.getint("GENERAL", "scenarios"))
 
-        for scenario in scenarios:
-            datasets_histo = self.config.get("GENERAL", "scenario_extr_" + scenario)
+        for scenario in self.scenarios:
+            datasets_histo = self.scenario_extr[scenario]
 
             atmosfield = []
-            for f in datasets_proj:
+            # for f in datasets_proj:
+            for f in datasets_histo:
                 # SSP Datasets
                 # regrouped by climate variable
-                atmosfield.append(xr.open_dataset(dataset_root + "/" + f))
+                atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f))
 
             atmosfield_proj = xr.concat(atmosfield, "time")
 

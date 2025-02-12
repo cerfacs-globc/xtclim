@@ -10,7 +10,7 @@
 
 # #### 0. Libraries
 
-import configparser as cp
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -19,15 +19,11 @@ from itwinai.components import DataGetter, monitor_exec
 
 
 class SplitPreprocessedData(DataGetter):
-    def __init__(self, config_path: str = "./xtclim.json"):
+    def __init__(self, input_path: str, scenarios: List[int], n_memb: int):
         super().__init__()
-        self.config_path = config_path
-
-        # #### Configuration file
-        self.config = cp.ConfigParser()
-        self.config.read(self.config_path)
-
-        self.input_path = self.config.get("GENERAL", "input_path")
+        self.input_path = input_path
+        self.scenarios = scenarios
+        self.n_memb = n_memb
 
     # #### 2. Split Yearly Data into Four Seasonal Datasets
     # split daily data into seasons
@@ -113,14 +109,7 @@ class SplitPreprocessedData(DataGetter):
     def execute(self):
         # #### 1. Load Data to xarray
 
-        # choose the needed number of members
-        n_memb = self.config.get("TRAIN", "n_memb")
-
-        # define relevant scenarios
-        # scenarios = ["126", "245", "370", "585"]
-        scenarios = json.loads(self.config.getint("GENERAL", "scenarios"))
         # Load preprocessed "daily temperature images" and time series
-
         train_images = np.load(self.input_path + "/preprocessed_2d_train_data_allssp.npy")
         test_images = np.load(self.input_path + "/preprocessed_2d_test_data_allssp.npy")
         train_time = pd.read_csv(self.input_path + "/dates_train_data.csv")
@@ -128,21 +117,21 @@ class SplitPreprocessedData(DataGetter):
 
         # #### 3. Apply to Train and Test Datasets
         train_season_images, train_season_time = self.season_split(
-            train_images, train_time, "train", n_memb
+            train_images, train_time, "train", self.n_memb
         )
 
         test_season_images, test_season_time = self.season_split(
-            test_images, test_time, "test", n_memb
+            test_images, test_time, "test", self.n_memb
         )
 
         # #### 4. Apply to Projection Datasets
 
-        for scenario in scenarios:
+        for scenario in self.scenarios:
             proj_images = np.load(
                 self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy"
             )
             proj_time = pd.read_csv(self.input_path + "/dates_proj_data.csv")
 
             proj_season_images, proj_season_time = self.season_split(
-                proj_images, proj_time, "proj", n_memb
+                proj_images, proj_time, "proj", self.n_memb
             )

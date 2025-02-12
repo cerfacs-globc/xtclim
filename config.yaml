@@ -1,0 +1,152 @@
+# General configuration
+GENERAL:
+  # Pick the season to study among:
+  # "" (none, i.e. full dataset), "winter", "spring", "summer", "autumn"
+  seasons: ["winter", "spring", "summer", "autumn"]
+
+  # SSP scenarios
+  # scenarios = [585, 370, 245, 126]
+  scenarios: [245]
+
+  # Data directory
+  dataset_root: /Users/page/Documents/projets/interTwin/xtclim_env/data
+
+  # Input path
+  input_path: /Users/page/Documents/projets/interTwin/xtclim_env/input
+
+  # Output path
+  output_path: /Users/page/Documents/projets/interTwin/xtclim_env/outputs
+
+  # Variable
+  var_extr: tasmax
+
+  # Input Files
+  #
+  # Historical
+  histo_extr:
+    - tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19500101-19741231.nc
+    - tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_19750101-19991231.nc
+    - tasmax_day_CMCC-ESM2_historical_r1i1p1f1_gn_20000101-20141231.nc
+
+  # Scenario-based projections
+  scenario_extr:
+    585:
+      - tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20150101-20391231.nc
+      - tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20400101-20641231.nc
+      - tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20650101-20891231.nc
+      - tasmax_day_CMCC-ESM2_ssp585_r1i1p1f1_gn_20900101-21001231.nc
+    370:
+      - tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20150101-20391231.nc
+      - tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20400101-20641231.nc
+      - tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20650101-20891231.nc
+      - tasmax_day_CMCC-ESM2_ssp370_r1i1p1f1_gn_20900101-21001231.nc
+    245:
+      - tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20150101-20391231.nc
+      - tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20400101-20641231.nc
+      - tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20650101-20891231.nc
+      - tasmax_day_CMCC-ESM2_ssp245_r1i1p1f1_gn_20900101-21001231.nc
+    126:
+      - tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20150101-20391231.nc
+      - tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20400101-20641231.nc
+      - tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20650101-20891231.nc
+      - tasmax_day_CMCC-ESM2_ssp126_r1i1p1f1_gn_20900101-21001231.nc
+
+  # Land-sea mask file
+  landsea_mask: sftlf_fx_CESM2_historical_r9i1p1f1_gn.nc
+
+  # Geographical region bounding box
+  min_lon: -10.0
+  max_lon: 29.0
+  min_lat: 36.0
+  max_lat: 66.0
+
+TRAIN:
+  # Number of members used for training the network
+  n_memb: 1
+
+  # Initialize learning parameters
+  lr0: 0.001
+  batch_size: 10  # batch_size = 64 (alternative option)
+  epochs: 3  # epochs = 100 (alternative option)
+  strategy: ddp
+
+  # Early stopping parameters
+  # Under 1% improvement, consider the model starts converging
+  stop_delta: 0.01
+  # Wait for a few epochs to be sure before actually stopping
+  patience: 15
+  # Count when validation loss < stop_delta
+  early_count: 0
+  # Keep track of validation loss at t-1
+  old_valid_loss: 0.0
+
+  # Random high value for validation loss initialization
+  min_valid_epoch_loss: 100
+
+MODEL:
+  # Kernel size (4,4)
+  kernel_size: 4
+  # Initial number of filters
+  init_channels: 8
+  # Number of input channels/variables (e.g., max temperature, precipitation, wind)
+  image_channels: 2
+  # Latent space dimension (in which the image is compressed)
+  latent_dim: 128
+
+  # KL divergence handles dispersion of information in latent space
+  # A balance is to be found with the prevailing reconstruction error
+  beta: 0.1
+
+  # Number of evaluations for each dataset
+  n_avg: 20
+
+  # Choose whether to evaluate train and test data, and/or projections
+  past_evaluation: False
+  future_evaluation: True
+
+  # Anomaly detection threshold (percentile)
+  anomaly_percent: 99
+
+
+
+# Training workflow
+pipeline:
+  class_path: itwinai.pipeline.Pipeline
+  init_args:
+    steps:
+        preprocessing-step:
+          class_path: itwinai.plugins.xtclim.preprocessing.preprocess_functions_2d_ssp.PreprocessData
+          init_args:
+            dataset_root: ${GENERAL.dataset_root}
+            input_path: ${GENERAL.input_path}
+            output_path: ${GENERAL.output_path}
+            histo_extr: ${GENERAL.histo_extr}
+            min_lon: ${GENERAL.min_lon}
+            max_lon: ${GENERAL.max_lon}
+            min_lat: ${GENERAL.min_lat}
+            max_lat: ${GENERAL.max_lat}
+            scenarios: ${GENERAL.scenarios}
+            scenario_extr: ${GENERAL.scenario_extr}
+        preprocessing-split-step:
+          class_path: itwinai.plugins.xtclim.preprocessing.preprocess_2d_seasons.SplitPreprocessedData
+          init_args:
+            input_path: ${GENERAL.input_path}
+            n_memb: ${TRAIN.n_memb}
+            scenarios: ${GENERAL.scenarios}
+        training-step:
+          class_path: itwinai.plugins.xtclim.src.trainer.TorchTrainer
+          init_args:
+            input_path: ${GENERAL.input_path}
+            output_path: ${GENERAL.output_path}
+            seasons: ${GENERAL.seasons}
+            epochs: ${TRAIN.epochs}
+            lr: ${TRAIN.lr0}
+            batch_size: ${TRAIN.batch_size}
+            n_memb: ${TRAIN.n_memb}
+            beta: ${MODEL.beta}
+            n_avg: ${MODEL.n_avg}
+            stop_delta: ${TRAIN.stop_delta}
+            patience: ${TRAIN.patience}
+            early_count: ${TRAIN.early_count}
+            old_valid_loss: ${TRAIN.old_valid_loss}
+            min_valid_epoch_loss: ${TRAIN.min_valid_epoch_loss}

@@ -2,15 +2,7 @@
 Train file to launch pipeline
 """
 
-import os
-import sys
-from typing import Dict
-import argparse
-import logging
-from datetime import datetime
-
-
-from itwinai.parser import ConfigParser, ArgumentParser
+from itwinai.parser import ArgumentParser, ConfigParser
 
 if __name__ == "__main__":
     parser = ArgumentParser()

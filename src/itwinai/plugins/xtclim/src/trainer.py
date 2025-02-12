@@ -15,8 +15,7 @@ tracker = EmissionsTracker(
 tracker.start()
 """
 
-import configparser as cp
-import json
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -33,68 +32,54 @@ from itwinai.plugins.xtclim.src.utils import save_loss_plot
 
 
 class TorchTrainer(Trainer):
-    def __init__(self, config_path: str = "./xtclim.json"):
+    def __init__(
+        self,
+        input_path: str,
+        output_path: str,
+        seasons: List[str],
+        epochs: int = 100,
+        lr: float = 1e-3,
+        batch_size: int = 64,
+        n_memb: int = 1,
+        beta: float = 0.1,
+        n_avg: int = 20,
+        stop_delta: float = 1e2,
+        patience: int = 15,
+        early_count: int = 0,
+        old_valid_loss: float = 0.0,
+        min_valid_epoch_loss: float = 100.0,
+    ):
         super().__init__()
-        self.config_path = config_path
-
-        # ### Configuration file
-        self.config = cp.ConfigParser()
-        self.config.read(config_path)
-
-        self.epochs = self.config.getint("TRAIN", "epochs")
-        self.batch_size = self.config.getint("TRAIN", "batch_size")
-        self.lr = self.config.getfloat("TRAIN", "lr")
+        self.input_path = input_path
+        self.output_path = output_path
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.lr = lr
+        self.stop_delta = stop_delta
+        self.patience = patience
+        self.early_count = early_count
+        self.old_valid_loss = old_valid_loss
+        self.beta = beta
+        self.n_avg = n_avg
+        self.seasons = seasons
+        self.n_memb = n_memb
+        self.min_valid_epoch_loss = min_valid_epoch_loss
 
     @monitor_exec
     def execute(self):
-        # Load input and output data
-        self.input_path = json.loads(self.config.get("GENERAL", "input_path"))
-        self.output_path = json.loads(self.config.get("GENERAL", "output_path"))
+        device, criterion, _ = initialization()
 
-        # KL divergence handles dispersion of information in latent space
-        # a balance is to be found with the prevailing reconstruction error
-        beta = self.config.getfloat("MODEL", "beta")
-        # beta = 0.1
-
-        # number of evaluations for each dataset
-        n_avg = self.config.getint("MODEL", "n_avg")
-        # n_avg = 20
-
-        device, criterion, pixel_wise_criterion = initialization(self.config_path)
-
-        # pick the season to study among:
-        # '' (none, i.e. full dataset), 'winter_', 'spring_', 'summer_', 'autumn_'
-        # seasons = ["winter_", "spring_", "summer_", "autumn_"]
-        seasons = json.loads(self.config.get("GENERAL", "seasons"))
-
-        # number of members used for the training of the network
-        n_memb = self.config.getint("TRAIN", "n_memb")
-
-        # initialize learning parameters
-        # lr0 = 0.001
-        # batch_size = 64
-        # epochs = 100
-        # early stopping parameters
-        stop_delta = self.config.getfloat("TRAIN", "stop_delta")
-        # stop_delta = 0.01  # under 1% improvement consider the model starts converging
-        patience = self.config.getint("TRAIN", "patience")
-        # patience = 15  # wait for a few epochs to be sure before actually stopping
-        early_count = self.config.getint("TRAIN", "early_count")
-        # early_count = 0  # count when validation loss < stop_delta
-        old_valid_loss = self.config.getfloat("TRAIN", "old_valid_loss")
-        # old_valid_loss = 0  # keep track of validation loss at t-1
-
-        for season in seasons:
+        for season in self.seasons:
             # initialize the model
             cvae_model = model.ConvVAE().to(device)
             optimizer = optim.Adam(cvae_model.parameters(), lr=self.lr)
 
             # load training set and train data
             train_time = pd.read_csv(
-                self.input_path + f"/dates_train_{season}_data_{n_memb}memb.csv"
+                self.input_path + f"/dates_train_{season}_data_{self.n_memb}memb.csv"
             )
             train_data = np.load(
-                self.input_path + f"/preprocessed_1d_train_{season}_data_{n_memb}memb.npy"
+                self.input_path + f"/preprocessed_1d_train_{season}_data_{self.n_memb}memb.npy"
             )
             n_train = len(train_data)
             trainset = [
@@ -106,10 +91,10 @@ class TorchTrainer(Trainer):
 
             # load validation set and validation data
             test_time = pd.read_csv(
-                self.input_path + f"/dates_test_{season}_data_{n_memb}memb.csv"
+                self.input_path + f"/dates_test_{season}_data_{self.n_memb}memb.csv"
             )
             test_data = np.load(
-                self.input_path + f"/preprocessed_1d_test_{season}_data_{n_memb}memb.npy"
+                self.input_path + f"/preprocessed_1d_test_{season}_data_{self.n_memb}memb.npy"
             )
             n_test = len(test_data)
             testset = [
@@ -123,20 +108,18 @@ class TorchTrainer(Trainer):
             # a list to save the loss evolutions
             train_loss = []
             valid_loss = []
-            min_valid_epoch_loss = self.config.getint("TRAIN", "min_valid_epoch_loss")
-            # min_valid_epoch_loss = 100  # random high value
 
             for epoch in range(self.epochs):
                 print(f"Epoch {epoch + 1} of {self.epochs}")
 
                 # train the model
                 train_epoch_loss = train(
-                    cvae_model, trainloader, trainset, device, optimizer, criterion, beta
+                    cvae_model, trainloader, trainset, device, optimizer, criterion, self.beta
                 )
 
                 # evaluate the model on the test set
                 valid_epoch_loss, recon_images = validate(
-                    cvae_model, testloader, testset, device, criterion, beta
+                    cvae_model, testloader, testset, device, criterion, self.beta
                 )
 
                 # keep track of the losses
@@ -156,7 +139,7 @@ class TorchTrainer(Trainer):
 
         # decreasing learning rate
         if (epoch + 1) % 20 == 0:
-            lr = lr / 5
+            self.lr /= 5
 
         # -------
 
@@ -181,11 +164,11 @@ class TorchTrainer(Trainer):
         # ---------------
 
         # save best model
-        if valid_epoch_loss < min_valid_epoch_loss:
-            min_valid_epoch_loss = valid_epoch_loss
+        if valid_epoch_loss < self.min_valid_epoch_loss:
+            self.min_valid_epoch_loss = valid_epoch_loss
             torch.save(
                 cvae_model.state_dict(),
-                self.output_path + f"/cvae_model_{season}_1d_{n_memb}memb.pth",
+                self.output_path + f"/cvae_model_{season}_1d_{self.n_memb}memb.pth",
             )
 
             print(f"Train Loss: {train_epoch_loss:.4f}")
@@ -194,10 +177,10 @@ class TorchTrainer(Trainer):
             save_loss_plot(train_loss, valid_loss, season, self.output_path)
             # save the loss evolutions
             pd.DataFrame(train_loss).to_csv(
-                self.output_path + f"/train_loss_indiv_{season}_1d_{n_memb}memb.csv"
+                self.output_path + f"/train_loss_indiv_{season}_1d_{self.n_memb}memb.csv"
             )
             pd.DataFrame(valid_loss).to_csv(
-                self.output_path + f"/test_loss_indiv_{season}_1d_{n_memb}memb.csv"
+                self.output_path + f"/test_loss_indiv_{season}_1d_{self.n_memb}memb.csv"
             )
 
         # emissions = tracker.stop()
