@@ -1,4 +1,7 @@
 uv.lock
+input/
+output/
+tmp.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

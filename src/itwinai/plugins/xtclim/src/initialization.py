@@ -1,14 +1,8 @@
-import configparser as cp
-
 import torch
 import torch.nn as nn
 
 
-def initialization(config_path: str = "./xtclim.json"):
-    # Configuration file
-    config = cp.ConfigParser()
-    config.read(config_path)
-
+def initialization():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Mean-Squared Error as the average difference between the pixels
