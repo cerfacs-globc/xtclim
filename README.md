@@ -40,22 +40,31 @@ The config file `config.yaml` contains all the steps to execute the workflow.
 You can launch it from the root of the repository with:
 
 ```bash
-itwinai exec-pipeline --config config.yaml
+itwinai exec-pipeline --config-name config.yaml
 ```
+
+> [!NOTE]
+> To help debugging errors, prepend `HYDRA_FULL_ERROR=1` to your command, or
+> set it as an evironment variable with `export HYDRA_FULL_ERROR=1`.
+> Example:
+>
+> ```bash
+> HYDRA_FULL_ERROR=1 itwinai exec-pipeline --config-name config.yaml
+> ```
 
 To dynamically override some (nested) fields from terminal you can do:
 
 ```bash
-itwinai exec-pipeline --config config.yaml \
-    -o GENERAL.dataset_root=/path/to/data \
-    -o GENERAL.input_path=input \
-    -o GENERAL.output_path=output
+itwinai exec-pipeline --config-name config.yaml \
+    GENERAL.dataset_root=/path/to/data \
+    GENERAL.input_path=input \
+    GENERAL.output_path=output
 ```
 
 To run only some steps, e.g., only training step after the training dataset has been generated, use:
 
 ```bash
-itwinai exec-pipeline --config config.yaml --steps training-step
+itwinai exec-pipeline --config-name config.yaml +pipe_steps=[training-step]
 ```
 
 ## TODOs
