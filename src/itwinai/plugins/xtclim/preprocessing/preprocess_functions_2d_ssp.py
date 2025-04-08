@@ -302,4 +302,4 @@ class PreprocessData(DataGetter):
                 self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy",
                 total_proj,
             )
-            pd.DataFrame(time_proj).to_csv(self.input_path + "/dates_proj{scenario}_data.csv")
+            pd.DataFrame(time_proj).to_csv(self.input_path + f"/dates_proj{scenario}_data.csv")
