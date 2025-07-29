@@ -1,0 +1,55 @@
+name: CI - Lint, Tests, and Link Check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  lint-test-links:
+    name: Lint with Ruff, run tests, and check links
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install project and dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev] || pip install .
+          pip install pytest pytest-cov ruff
+
+      - name: Lint with Ruff (check and fix)
+        run: |
+          ruff check . --fix
+          ruff format .
+
+      - name: Lint with flake8 (SQAaaS requirement)
+        run: |
+          pip install flake8
+          flake8 .
+
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=itwinai.plugins.xtclim --cov-report=xml
+          coverage report --fail-under=70
+
+      - name: Check Markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: ".github/linters/mlc_config.json"
+          check-modified-files-only: "yes"
+          use-quiet-mode: "yes"
+          use-verbose-mode: "yes"
+          base-branch: "main"
