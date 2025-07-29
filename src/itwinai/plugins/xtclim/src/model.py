@@ -1,5 +1,3 @@
-import configparser as cp
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,7 +13,7 @@ class ConvVAE(nn.Module):
     """
 
     def __init__(
-        self, 
+        self,
         kernel_size: int = 4,
         init_channels: int = 8,
         image_channels: int = 2,
@@ -23,7 +21,7 @@ class ConvVAE(nn.Module):
     ):
         super(ConvVAE, self).__init__()
 
-       # encoder
+        # encoder
         self.enc1 = nn.Conv2d(
             in_channels=image_channels,
             out_channels=init_channels,

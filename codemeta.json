@@ -1,0 +1,28 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "name": "itwinai-xtclim-plugin",
+    "description": "xtclim plugin for itwinai",
+    "version": "0.1.0",
+    "codeRepository": "https://github.com/interTwin-eu/itwinai",
+    "license": "MIT",
+    "programmingLanguage": "Python",
+    "developmentStatus": "active",
+    "dateCreated": "2025-05-21",
+    "dateModified": "2025-05-21",
+    "author": [
+        {
+            "@type": "Person",
+            "givenName": "Christian",
+            "familyName": "Page",
+            "email": "christian.page@cerfacs.fr"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Matteo",
+            "familyName": "Bunino",
+            "email": "matteo.bunino@cern.ch"
+        }
+    ],
+    "identifier": "doi:10.xxxx/zenodo.xxxxxxx"
+}

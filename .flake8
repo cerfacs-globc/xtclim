@@ -1,0 +1,5 @@
+# SQAaaS requirement but Ruff is better
+[flake8]
+max-line-length = 130
+extend-ignore = E203
+exclude = .git,__pycache__,docs,tests,build,dist

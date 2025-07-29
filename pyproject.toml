@@ -5,30 +5,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "itwinai-xtclim-plugin"
 version = "0.1.0"
-requires-python = ">=3.10"
 description = "xtclim plugin for itwinai"
 authors = [
     { name = "Christian Page", email = "christian.page@cerfacs.fr" },
     { name = "Matteo Bunino", email = "matteo.bunino@cern.ch" },
 ]
 dependencies = [
-    "cartopy>=0.24.1",
-    "cftime>=1.6.4.post1",
-    "codecarbon>=2.8.3",
-    "dask>=2025.2.0",
-    "datetime>=5.5",
-    "h5netcdf>=1.6.1",
-    "imageio>=2.37.0",
-    "ipykernel>=6.29.5",
-    "itwinai[torch]>=0.3.0",
-    "matplotlib>=3.10.1",
-    "netcdf4>=1.7.2",
-    "numpy>=1.26.4",
-    "pandas>=2.2.3",
-    "ruff>=0.9.6",
-    "tqdm>=4.67.1",
-    "urllib3>=1.26.13",
-    "xarray>=2025.1.2",
+    "cartopy",
+    "cftime",
+    "codecarbon",
+    "dask",
+    "datetime",
+    "h5netcdf",
+    "imageio",
+    "ipykernel",
+    "itwinai[torch]",
+    "matplotlib",
+    "netcdf4",
+    "numpy",
+    "pandas",
+    "ruff",
+    "tqdm",
+    "urllib3",
+    "xarray",
+    "torch",
+    "torchvision"
 ]
 
 
@@ -47,7 +48,11 @@ include = [
 
 # Ruff configuration: https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
-line-length = 95
+line-length = 130
+exclude = [
+  ".git", "__pycache__", "docs/conf.py", "use-cases", "tutorials",
+  "tests", "old", "build", "dist", ".venv*", "envAI*", "env-files", ".vscode"
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
@@ -59,3 +64,19 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["itwinai.plugins.xtclim"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 70
+
+[tool.coverage.xml]
+output = "coverage.xml"

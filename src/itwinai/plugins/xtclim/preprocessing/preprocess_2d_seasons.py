@@ -68,37 +68,25 @@ class SplitPreprocessedData(DataGetter):
 
         # save results as an input for CVAE training
         np.save(
-            self.input_path
-            + f"/preprocessed_1d_{dataset_type}{scenario}_winter_data_{self.n_memb}memb.npy",
+            self.input_path + f"/preprocessed_1d_{dataset_type}{scenario}_winter_data_{self.n_memb}memb.npy",
             winter_images,
         )
         np.save(
-            self.input_path
-            + f"/preprocessed_1d_{dataset_type}{scenario}_spring_data_{self.n_memb}memb.npy",
+            self.input_path + f"/preprocessed_1d_{dataset_type}{scenario}_spring_data_{self.n_memb}memb.npy",
             spring_images,
         )
         np.save(
-            self.input_path
-            + f"/preprocessed_1d_{dataset_type}{scenario}_summer_data_{self.n_memb}memb.npy",
+            self.input_path + f"/preprocessed_1d_{dataset_type}{scenario}_summer_data_{self.n_memb}memb.npy",
             summer_images,
         )
         np.save(
-            self.input_path
-            + f"/preprocessed_1d_{dataset_type}{scenario}_autumn_data_{self.n_memb}memb.npy",
+            self.input_path + f"/preprocessed_1d_{dataset_type}{scenario}_autumn_data_{self.n_memb}memb.npy",
             autumn_images,
         )
-        pd.DataFrame(winter_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_winter_data_{self.n_memb}memb.csv"
-        )
-        pd.DataFrame(spring_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_spring_data_{self.n_memb}memb.csv"
-        )
-        pd.DataFrame(summer_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_summer_data_{self.n_memb}memb.csv"
-        )
-        pd.DataFrame(autumn_time).to_csv(
-            self.input_path + f"/dates_{dataset_type}_autumn_data_{self.n_memb}memb.csv"
-        )
+        pd.DataFrame(winter_time).to_csv(self.input_path + f"/dates_{dataset_type}_winter_data_{self.n_memb}memb.csv")
+        pd.DataFrame(spring_time).to_csv(self.input_path + f"/dates_{dataset_type}_spring_data_{self.n_memb}memb.csv")
+        pd.DataFrame(summer_time).to_csv(self.input_path + f"/dates_{dataset_type}_summer_data_{self.n_memb}memb.csv")
+        pd.DataFrame(autumn_time).to_csv(self.input_path + f"/dates_{dataset_type}_autumn_data_{self.n_memb}memb.csv")
 
         season_images = [winter_images, spring_images, summer_images, autumn_images]
         season_time = winter_time, spring_time, summer_time, autumn_time
@@ -130,15 +118,12 @@ class SplitPreprocessedData(DataGetter):
 
         # # #### 4. Apply to Projection Datasets
 
-        # for scenario in self.scenarios:
-        #     proj_images = np.load(
-        #         self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy"
-        #     )
-        #     proj_time = pd.read_csv(self.input_path + "/dates_proj_data.csv")
-
-        #     proj_season_images, proj_season_time = self.season_split(
-        #         images=proj_images,
-        #         time=proj_time,
-        #         dataset_type="proj",
-        #         scenario=scenario,
-        #     )
+        for scenario in self.scenarios:
+            proj_images = np.load(self.input_path + f"/preprocessed_2d_proj{scenario}_data_allssp.npy")
+            proj_time = pd.read_csv(self.input_path + f"/dates_proj{scenario}_data.csv")
+            proj_season_images, proj_season_time = self.season_split(
+                images=proj_images,
+                time=proj_time,
+                dataset_type="proj",
+                scenario=scenario,
+            )

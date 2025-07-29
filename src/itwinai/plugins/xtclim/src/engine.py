@@ -35,9 +35,7 @@ def train(model, dataloader, dataset, device, optimizer, criterion, beta):
     model.train()
     running_loss = 0.0
     counter = 0
-    for i, data in tqdm(
-        enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)
-    ):
+    for i, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
         counter += 1
         data = data[0]
         data = data.to(device)
@@ -70,9 +68,7 @@ def validate(model, dataloader, dataset, device, criterion, beta):
     running_loss = 0.0
     counter = 0
     with torch.no_grad():
-        for i, data in tqdm(
-            enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)
-        ):
+        for i, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
             counter += 1
             data = data[0]
             data = data.to(device)
@@ -115,9 +111,7 @@ def evaluate(
     recon_images = []
     pixel_wise_losses = []
     with torch.no_grad():
-        for i, data in tqdm(
-            enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)
-        ):
+        for i, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
             counter += 1
             data = data[0]
             data = data.to(device)
@@ -131,42 +125,3 @@ def evaluate(
             recon_images.append(reconstruction)
     val_loss = running_loss / counter
     return val_loss, recon_images, losses, pixel_wise_losses
-
-
-def latent_space_position(model, dataloader, dataset, device, criterion):
-    """
-    Evaluates the CVAE network and returns the reconstruction loss
-    (no KL divergence component) and reconstructions (no backpropagation).
-    Returns the means and variances of the latent encodings.
-
-    Parameters:
-    model: neural network (CVAE)
-    dataloader: test data
-    dataset: original data
-    device: CPU or GPU
-    criterion: loss metric
-    """
-    model.eval()
-    running_loss = 0.0
-    counter = 0
-    with torch.no_grad():
-        for i, data in tqdm(
-            enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)
-        ):
-            counter += 1
-            data = data[0]
-            data = data.to(device)
-            reconstruction, mu, logvar = model(data)
-            if i == 0:
-                mus = mu
-                logvars = logvar
-            else:
-                mus = torch.cat((mus, mu), 0)
-                logvars = torch.cat((logvars, logvar), 0)
-            loss = criterion(reconstruction, data)
-            running_loss += loss.item()
-            # save the last batch input and output of every epoch
-            if i == int(len(dataset) / dataloader.batch_size) - 1:
-                recon_images = reconstruction
-    val_loss = running_loss / counter
-    return val_loss, recon_images, mus, logvars
