@@ -38,7 +38,7 @@ jobs:
       - name: Lint with flake8 (SQAaaS requirement)
         run: |
           pip install flake8
-          flake8 .
+          flake8 --config=.flake8 .
 
       - name: Run tests with coverage
         run: |
