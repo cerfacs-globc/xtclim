@@ -5,6 +5,8 @@ on:
   push:
   pull_request:
 
+permissions: read-all
+
 jobs:
   markdown-link-check:
     name: Check links using markdown-link-check

@@ -5,6 +5,8 @@ on:
   push:
   pull_request:
 
+permissions: read-all
+
 jobs:
   super-lint:
     name: Lint with Super-Linter
