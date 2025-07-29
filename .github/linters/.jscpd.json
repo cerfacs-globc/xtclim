@@ -1,9 +1,4 @@
 {
   "threshold": 3,
-  "ignore": [
-    "**/node_modules/**",
-    "**/.git/**",
-    "**/*.md",
-    "**/tests/**"
-  ]
+  "ignore": ["**/node_modules/**", "**/.git/**", "**/*.md", "**/tests/**"]
 }
