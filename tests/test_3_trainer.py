@@ -19,9 +19,9 @@ def generate_mock_data(path: str, seasons, modes=["train", "test"], n_memb=1, nu
             )
 
 
-def test_trainer():
-    input_path = "mock_inputs"
-    output_path = "mock_outputs"
+def test_trainer(tmp_path):
+    input_path = str(tmp_path / "mock_inputs")
+    output_path = str(tmp_path / "mock_outputs")
     seasons = ["winter", "spring"]
 
     # 1. Génère des données factices

@@ -6,10 +6,15 @@ import torch
 from itwinai.plugins.xtclim.src.model import ConvVAE
 from itwinai.plugins.xtclim.src.trainer import TorchTrainer, TorchInference
 
-def test_trainer():
-    input_path = "mock_inputs"
-    output_path = "mock_outputs"
+import warnings
+warnings.simplefilter("always")
+
+def test_trainer(tmp_path):
+    input_path = str(tmp_path / "mock_inputs")
+    output_path = str(tmp_path / "mock_outputs")
     seasons = ["winter", "spring"]
+
+    os.makedirs(output_path, exist_ok=True)
 
     def generate_mock_data(path: str, seasons, modes=["train", "test"], n_memb=1, num_samples=20):
         os.makedirs(path, exist_ok=True)
@@ -48,9 +53,9 @@ def test_trainer():
     trainer.execute()
 
 
-def test_inference():
-    input_path = "mock_inputs"
-    output_path = "mock_outputs"
+def test_inference(tmp_path):
+    input_path = str(tmp_path / "mock_inputs")
+    output_path = str(tmp_path / "mock_outputs")
     seasons = ["winter", "spring"]
     scenarios = ["ssp245"]
     n_memb = 1
@@ -58,6 +63,8 @@ def test_inference():
     init_channels = 8
     kernel_size = 4
     image_channels = 2
+
+    os.makedirs(output_path, exist_ok=True)
 
     def generate_mock_data(path: str, seasons, scenarios, n_memb=1, num_samples=20):
         os.makedirs(path, exist_ok=True)
@@ -103,3 +110,4 @@ def test_inference():
         for scenario in scenarios:
             expected_path = f"{output_path}/proj{scenario}_loss_indiv_{season}_1d_{n_memb}memb.csv"
             assert os.path.exists(expected_path), f"{expected_path} not found!"
+            

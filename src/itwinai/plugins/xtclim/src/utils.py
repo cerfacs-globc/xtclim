@@ -32,5 +32,5 @@ def save_loss_plot(train_loss, valid_loss, season="", output_path: str = "./outp
     plt.ylabel("Loss")
     plt.legend()
     plt.savefig(output_path + f"/{season}loss.jpg")
-    plt.show()
+    # plt.show()
     plt.close()
