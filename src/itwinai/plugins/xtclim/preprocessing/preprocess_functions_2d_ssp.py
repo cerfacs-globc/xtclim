@@ -257,7 +257,7 @@ class PreprocessData(DataGetter):
             for f in dataset:
                 # SSP Datasets
                 # regrouped by climate variable
-                atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f), engine="netcdf4")
+                atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f, engine="netcdf4"))
 
             atmosfield_proj = xr.concat(atmosfield, "time")
 

@@ -14,7 +14,8 @@ def test_preprocess_data_synthetic(tmp_path):
     data = xr.DataArray(np.random.rand(3, 2, 2), dims=["time", "lat", "lon"],
                         coords={"time": [0, 1, 2], "lat": [0.25, 0.75], "lon": [0.25, 0.75]})
     ds = xr.Dataset({"tas": data})
-    input_file = input_dir / "input.nc"
+    input_file = dataset_root / "input.nc"
+    ds.attrs["variable_id"] = "tas"
     ds.to_netcdf(input_file, format="NETCDF3_CLASSIC")
 
     # Fichier land‐sea mask requis dans dataset_root
@@ -23,14 +24,14 @@ def test_preprocess_data_synthetic(tmp_path):
     mask_ds.attrs["variable_id"] = "mask"
     mask_ds.to_netcdf(mask, format="NETCDF3_CLASSIC")
 
-    # Fichier SSP dans dataset_root (on donne le nom exact "ssp1.nc")
-    ssp_file = dataset_root / "ssp1.nc"
+    # Fichier SSP dans dataset_root (on donne le nom exact "585.nc")
+    ssp_file = dataset_root / "585.nc"
     ds.attrs["variable_id"] = "tas"
     ds.to_netcdf(ssp_file, format="NETCDF3_CLASSIC")
 
     # Construire le dict scenario_extr attendu par PreprocessData
-    #  - clé "ssp1" avec liste de fichiers (nom relatif à dataset_root)
-    scenario_extr = {"ssp1": ["ssp1.nc"]}
+    #  - clé "585" avec liste de fichiers (nom relatif à dataset_root)
+    scenario_extr = {585: ["585.nc"]}
 
     # Exécuter l’étape : on ne touche pas au code source,
     # on passe uniquement le paramètre scenario_extr sous forme de dict
@@ -38,14 +39,14 @@ def test_preprocess_data_synthetic(tmp_path):
         dataset_root=str(dataset_root),
         input_path=str(input_dir),
         output_path=str(tmp_path),
-        histo_extr=str(input_file),         # historiquement non utilisé dans execute()
+        histo_extr=["input.nc"],
         landsea_mask="landsea_mask.nc",     # fichier mask dans dataset_root
         min_lon=0,
         max_lon=1,
         min_lat=0,
         max_lat=1,
-        scenarios=["ssp1"],                  # liste de scénarios (ici un seul "ssp1")
-        scenario_extr=scenario_extr,         # dict mapping "ssp1" -> ["ssp1.nc"]
+        scenarios=[585],                  # liste de scénarios (ici un seul "585")
+        scenario_extr=scenario_extr,         # dict mapping "585" -> ["585.nc"]
     )
 
     step.execute()
@@ -55,6 +56,6 @@ def test_preprocess_data_synthetic(tmp_path):
     assert (input_dir / "preprocessed_2d_test_data_allssp.npy").exists()
     assert (input_dir / "dates_train_data.csv").exists()
     assert (input_dir / "dates_test_data.csv").exists()
-    # Et pour le scénario "ssp1", on doit également avoir :
-    assert (input_dir / "preprocessed_2d_projssp1_data_allssp.npy").exists()
-    assert (input_dir / "dates_projssp1_data.csv").exists()
+    # Et pour le scénario "585", on doit également avoir :
+    assert (input_dir / "preprocessed_2d_proj585_data_allssp.npy").exists()
+    assert (input_dir / "dates_proj585_data.csv").exists()
