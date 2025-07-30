@@ -203,13 +203,14 @@ class PreprocessData(DataGetter):
         atmosfield = []
 
         for f in dataset:
-            atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f))
+            atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f, engine="netcdf4"))
 
         atmosfield_histo = xr.concat(atmosfield, "time")
         # Load land-sea mask data
         sftlf = xr.open_dataset(
             f"{self.dataset_root}/{self.landsea_mask}",
             chunks={"time": 10},
+            engine="netcdf4"
         )
         # #### 2. Restrict to a Geospatial Square
         sq32_world_region = {
@@ -256,7 +257,7 @@ class PreprocessData(DataGetter):
             for f in dataset:
                 # SSP Datasets
                 # regrouped by climate variable
-                atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f))
+                atmosfield.append(xr.open_dataset(self.dataset_root + "/" + f), engine="netcdf4")
 
             atmosfield_proj = xr.concat(atmosfield, "time")
 

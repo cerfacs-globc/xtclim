@@ -15,18 +15,18 @@ def test_preprocess_data_synthetic(tmp_path):
                         coords={"time": [0, 1, 2], "lat": [0.25, 0.75], "lon": [0.25, 0.75]})
     ds = xr.Dataset({"tas": data})
     input_file = input_dir / "input.nc"
-    ds.to_netcdf(input_file)
+    ds.to_netcdf(input_file, format="NETCDF3_CLASSIC")
 
     # Fichier land‐sea mask requis dans dataset_root
     mask = dataset_root / "landsea_mask.nc"
     mask_ds = ds["tas"].isel(time=0).to_dataset(name="mask")
     mask_ds.attrs["variable_id"] = "mask"
-    mask_ds.to_netcdf(mask)
+    mask_ds.to_netcdf(mask, format="NETCDF3_CLASSIC")
 
     # Fichier SSP dans dataset_root (on donne le nom exact "ssp1.nc")
     ssp_file = dataset_root / "ssp1.nc"
     ds.attrs["variable_id"] = "tas"
-    ds.to_netcdf(ssp_file)
+    ds.to_netcdf(ssp_file, format="NETCDF3_CLASSIC")
 
     # Construire le dict scenario_extr attendu par PreprocessData
     #  - clé "ssp1" avec liste de fichiers (nom relatif à dataset_root)
