@@ -3,8 +3,6 @@ import pandas as pd
 
 from itwinai.plugins.xtclim.preprocessing.preprocess_2d_seasons import SplitPreprocessedData
 
-import warnings
-warnings.simplefilter("always")
 
 def test_split_preprocessed_data(tmp_path):
     # === Créer le dossier d'entrée

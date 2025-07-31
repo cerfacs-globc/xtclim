@@ -1,13 +1,12 @@
 import os
+
 import numpy as np
 import pandas as pd
 import torch
 
 from itwinai.plugins.xtclim.src.model import ConvVAE
-from itwinai.plugins.xtclim.src.trainer import TorchTrainer, TorchInference
+from itwinai.plugins.xtclim.src.trainer import TorchInference, TorchTrainer
 
-import warnings
-warnings.simplefilter("always")
 
 def test_trainer(tmp_path):
     input_path = str(tmp_path / "mock_inputs")
@@ -110,4 +109,4 @@ def test_inference(tmp_path):
         for scenario in scenarios:
             expected_path = f"{output_path}/proj{scenario}_loss_indiv_{season}_1d_{n_memb}memb.csv"
             assert os.path.exists(expected_path), f"{expected_path} not found!"
-            
+

@@ -1,8 +1,10 @@
 import os
+
 import numpy as np
 import pandas as pd
 
 from itwinai.plugins.xtclim.src.trainer import TorchTrainer
+
 
 def generate_mock_data(path: str, seasons, modes=["train", "test"], n_memb=1, num_samples=20):
     os.makedirs(path, exist_ok=True)

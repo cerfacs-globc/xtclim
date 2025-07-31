@@ -1,9 +1,10 @@
 def test_preprocess_data_synthetic(tmp_path):
-    import xarray as xr
     import numpy as np
+    import xarray as xr
+
     from itwinai.plugins.xtclim.preprocessing.preprocess_functions_2d_ssp import PreprocessData
 
-# Créer les dossiers
+    # Créer les dossiers
     input_dir = tmp_path / "input_dir"
     input_dir.mkdir()
 
